@@ -271,11 +271,13 @@ function fundraising_books_cron ($hook, $entity_type, $returnvalue, $params) {
 	
 	$init_date = new DateTime("2013-10-01");
 	$lower_timestamp = $init_date->getTimestamp();
-	$out_books = elgg_get_entities (array (
+	$out_books = elgg_get_entities_from_metadata (array (
 			'type' => 'object',
-			'subtype' => 'reward_book',
+			'subtype' => 'reward_book',			
 			'created_time_lower' => $lower_timestamp,
-			'created_time_upper' => $upper_timestamp
+			'created_time_upper' => $upper_timestamp,
+			'metadataname' => 'method',
+			'metadatavalue' => 'bankaccount',
 		));
 
 	foreach ($out_books as $book) {
@@ -294,7 +296,9 @@ function fundraising_books_cron ($hook, $entity_type, $returnvalue, $params) {
 			'type' => 'object',
 			'subtype' => 'reward_book',
 			'created_time_lower' => $lower_timestamp,
-			'created_time_upper' => $upper_timestamp			
+			'created_time_upper' => $upper_timestamp,
+			'metadataname' => 'method',
+			'metadatavalue' => 'bitcoin',
 		));
 	foreach ($out_books as $book) {
 		remove_entity_relationships($book->guid, "reward");	
