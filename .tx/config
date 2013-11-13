@@ -7,6 +7,8 @@ source_file = languages/en.php
 source_lang = en
 type = PHP_ARRAY
 
+
+
 [coopfunding.install]
 file_filter = install/languages/<lang>.php
 source_file = install/languages/en.php
@@ -16,6 +18,12 @@ type = PHP_ARRAY
 [coopfunding.banner]
 file_filter = mod/banner/languages/<lang>.php
 source_file = mod/banner/languages/en.php
+source_lang = en
+type = PHP_ARRAY
+
+[coopfunding.campaign_reward]
+file_filter = mod/campaign_reward/languages/<lang>.php
+source_file = mod/campaign_reward/languages/en.php
 source_lang = en
 type = PHP_ARRAY
 
@@ -73,6 +81,12 @@ source_file = mod/messages/languages/en.php
 source_lang = en
 type = PHP_ARRAY
 
+[coopfunding.moderation]
+file_filter = mod/moderation/languages/<lang>.php
+source_file = mod/moderation/languages/en.php
+source_lang = en
+type = PHP_ARRAY
+
 [coopfunding.profile]
 file_filter = mod/profile/languages/<lang>.php
 source_file = mod/profile/languages/en.php
@@ -102,3 +116,4 @@ file_filter = mod/uservalidationbyemail/languages/<lang>.php
 source_file = mod/uservalidationbyemail/languages/en.php
 source_lang = en
 type = PHP_ARRAY
+
