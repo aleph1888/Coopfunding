@@ -136,7 +136,8 @@ function campaign_reward_set_add_button ($hook, $entity_type, $return_value, $pa
 
 function campaign_reward_set_add_button_func ($guid) {
 
-	$project = get_entity ($guid->container_guid);
+	$fundcampaign = get_entity($guid);
+	$project = get_entity ($fundcampaign->container_guid);
 
 	if ($project && $project->isMember()) {
 
