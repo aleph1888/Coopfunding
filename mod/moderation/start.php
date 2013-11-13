@@ -9,9 +9,9 @@ function moderation_init() {
 
 	//Register actions
 	$action_base = elgg_get_plugins_path() . 'moderation/actions';
-	//elgg_register_action("moderation/save", "$action_base/save.php", 'public');
+
+	//TODO OR NOT convert save moderation into actions instead functions.
 	elgg_register_action("moderation/request", "$action_base/request.php", 'public');
-	elgg_register_action("moderation/commit", "$action_base/commit.php", 'public');
 
 	// Set up the menu
 	if (elgg_is_admin_logged_in()) {
@@ -27,8 +27,8 @@ function moderation_init() {
 
 	//Css
 	elgg_extend_view('css/elgg', 'moderation/css');
-}
 
+}
 
 function moderation_page_handler($page) {
 
@@ -38,7 +38,6 @@ function moderation_page_handler($page) {
 	elgg_push_breadcrumb(elgg_echo('moderation:moderation'), "moderation/main");
 
 	switch ($page[0]) {
-
 		case "main":
 			moderation_register_toggle();
 			moderation_handle_main_page();
@@ -48,9 +47,14 @@ function moderation_page_handler($page) {
 	}
 
 	return true;
+
 }
 
-
+/*
+* Lists entities in "request" state. Moderator should commit them, state("commited").
+* 	LIST 1, new entities. Entity is in state("request") and ACCESS_PRIVATE, then moderator can state("commited") and ACCESS_PUBLIC
+*	LIST 2, edited entities. Exists a revision in state("request"), then moderator can state("commited") and map to entity object.
+*/
 function moderation_handle_main_page() {
 
 	$title = elgg_echo('moderation:manage');
@@ -58,11 +62,10 @@ function moderation_handle_main_page() {
 	elgg_push_breadcrumb($title);
 
 	$content = "<h3>" . elgg_echo('moderation:manage:new petitions') . "</h3><br>";
-
 	$list = elgg_list_entities_from_metadata(array(
-	    'metadata_name' => 'state',
-	    'metadata_value' => 'request',
-	    'full_view' => false
+		'metadata_name' => 'state',
+		'metadata_value' => 'request',
+		'full_view' => false
 	));
 
 	if (!$list) {
@@ -72,13 +75,12 @@ function moderation_handle_main_page() {
 	$content .= $list;
 
 	$content .= "<br><h3>" . elgg_echo('moderation:manage:revision') . "</h3><br>";
-
 	$list= elgg_list_entities_from_metadata(array(
-	    'type' => 'object',
-	    'subtype' => 'revision',
-	    'metadata_name' => 'state',
-	    'metadata_value' => 'in_progress',
-	    'full_view' => false
+		'type' => 'object',
+		'subtype' => 'revision',
+		'metadata_name' => 'state',
+		'metadata_value' => 'request',
+		'full_view' => false
 	));
 
 	if (!$list) {
@@ -97,8 +99,12 @@ function moderation_handle_main_page() {
 	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($title, $body);
+
 }
 
+/*
+* As coming from the same edit page, switch between moderator or user entity to save.
+*/
 function moderation_do_save ($hook, $type, $returnvalue, $params) {
 
 	elgg_load_library('elgg:moderation');

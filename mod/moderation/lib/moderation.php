@@ -129,7 +129,7 @@ function moderation_do_admin_save($entity, $input) {
 
 	$entity_type = $entity->getSubtype();
 
-	//If this fundcampaigns becames active, deselect other possible active fundcampaign.
+	//If this fundcampaigns becomes active, deselect other possible active fundcampaign.
 	if($entity_type == "fundcampaign" && $input['is_active'] && !$entity->is_active){
 		elgg_load_library("elgg:fundcampaigns");
 		$entity_old = fundcampaigns_get_active_campaign($entity->container_guid);
@@ -230,7 +230,7 @@ function moderation_get_field_icon ($entity, $revision) {
 
 
 /*
-* Returns a button for user's to request for "commit" changes if there is any $revision which is "in_progress";  or false;
+* Returns a button for user's to request entity state from state("in_progress") to state("commited"); or false.
 */
 function moderation_get_request_user_button ($entity_guid) {
 
@@ -247,6 +247,7 @@ function moderation_get_request_user_button ($entity_guid) {
 	}
 
 	return false;
+
 }
 
 
