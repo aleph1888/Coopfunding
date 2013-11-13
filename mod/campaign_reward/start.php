@@ -26,10 +26,10 @@ function campaign_reward_init() {
 	elgg_register_plugin_hook_handler('fundcampaigns:sidebarmenus', 'fundcampaign', 'campaign_reward_set_side_bar_menu');
 
 	elgg_register_plugin_hook_handler('fundraising:rewards:selector', 'campaign_reward', 'campaign_reward_selector');
-	
+
 	elgg_register_plugin_hook_handler('fundraising:rewards:save', 'campaign_reward', 'campaign_reward_save');
 
-	elgg_register_plugin_hook_handler('fundraising:transaction:do_books', 'do_books', 'campaign_reward_do_books');		
+	elgg_register_plugin_hook_handler('fundraising:transaction:do_books', 'do_books', 'campaign_reward_do_books');
 
 	// add a campaign_reward widget
 	elgg_register_widget_type('campaign_reward', elgg_echo('campaign_reward'), elgg_echo('campaign_reward:widget:description'));
@@ -43,15 +43,15 @@ function campaign_reward_init() {
 
 	// override the default url to view a campaign object
 	elgg_register_plugin_hook_handler('entity:url', 'campaign_reward', 'campaign_reward_set_url');
-	
+
 	//Register for donate buttons
 	if (elgg_is_active_plugin('fundraising')) {
 	    elgg_register_library('coopfunding:fundraising', elgg_get_plugins_path() . 'fundraising/lib/fundraising.php');
 	}
 	if (elgg_is_active_plugin('fundcampaigns')) {
 	    elgg_register_library('coopfunding:fundcampaigns', elgg_get_plugins_path() . 'fundcampaigns/lib/fundcampaigns.php');
-	}	
-	
+	}
+
 	//Clean books not commited.
 	elgg_register_plugin_hook_handler('cron', 'daily', 'fundraising_books_cron');
 }
@@ -71,7 +71,7 @@ function campaign_reward_page_handler($page) {
 	if (!isset($page[0])) {
 		forward('', '404');
 	}
-    
+
 	$page_type = $page[0];
 	switch ($page_type) {
 		case 'owner':
@@ -79,7 +79,7 @@ function campaign_reward_page_handler($page) {
 			campaign_reward_set_add_button_func($page[1]);
 			break;
 		case 'add':
-			gatekeeper();		
+			gatekeeper();
 			$params = campaign_reward_get_page_content_edit($page_type, $page[1]);
 			break;
 		case 'edit':
@@ -122,11 +122,10 @@ function campaign_reward_set_side_bar_menu ($hook, $entity_type, $return_value, 
 		if (elgg_is_active_plugin('fundcampaigns')) {
 			$donatebutton = fundcampaigns_is_active_campaign($params);
 			$return_value .= elgg_view('campaign_reward/sidebar/rewards', array('entity' => $params, 'donatebutton' => $donatebutton));
-		}		
+		}
 	}
 
 	return $return_value;
-    
 }
 
 function campaign_reward_set_add_button ($hook, $entity_type, $return_value, $params) {
@@ -136,9 +135,9 @@ function campaign_reward_set_add_button ($hook, $entity_type, $return_value, $pa
 
 
 function campaign_reward_set_add_button_func ($guid) {
-	
+
 	$project = get_entity ($guid->container_guid);
-	
+
 	if ($project && $project->isMember()) {
 
 		$text = elgg_echo("campaign_reward:addreward");
@@ -157,7 +156,7 @@ function campaign_reward_set_add_button_func ($guid) {
 
 
 function campaign_reward_set_url($hook, $type, $url, $params) {
-    
+
 	$entity = $params['entity'];
 	if (elgg_instanceof($entity, 'object', 'campaign_reward')) {
 		return "campaign_reward/owner/{$entity->container_guid}";
@@ -172,9 +171,9 @@ $params['default_value']
 **/
 function campaign_reward_selector ($hook, $type, $returnvalue, $params){
 
-	elgg_load_library('elgg:campaign_reward');	
+	elgg_load_library('elgg:campaign_reward');
 
-	$select = campaign_reward_get_selector ($params); 
+	$select = campaign_reward_get_selector ($params);
 	return $select;
 
 }
@@ -188,9 +187,9 @@ $params['referer_if_out_stock']    if yes, goes back to referer if stocked. else
 
 */
 function campaign_reward_save ($hook, $type, $returnvalue, $params){
-	
-	elgg_load_library('elgg:campaign_reward');	
-	
+
+	elgg_load_library('elgg:campaign_reward');
+
 	$reward_guid = $params['reward_guid'];
 
 	if ($params['book_search_code']) {
@@ -202,27 +201,27 @@ function campaign_reward_save ($hook, $type, $returnvalue, $params){
 
 	$related_guid = campaign_reward_get_reward_or_transaction ($params['transaction_guid']);
 
-	$is_edited = $related_guid != $reward_guid;	
-	if ($is_edited) {	
+	$is_edited = $related_guid != $reward_guid;
+	if ($is_edited) {
 
-		remove_entity_relationships($params['transaction_guid'], "reward");	
+		remove_entity_relationships($params['transaction_guid'], "reward");
 		if ($reward_book) {
 			$reward_book->delete();
 		}
 
 		$non_default_reward = $reward_guid > 0;
 		if ($non_default_reward){
-			
+
 			list($is_stocked) = campaign_reward_is_stocked ($reward_guid);
-			
-			if ($is_stocked) {		
-				$relation = add_entity_relationship ($params['transaction_guid'], 'reward', $reward_guid);			
+
+			if ($is_stocked) {
+				$relation = add_entity_relationship ($params['transaction_guid'], 'reward', $reward_guid);
 			} else {
-				if ($params['referer_if_out_stock']){					
+				if ($params['referer_if_out_stock']){
 					forward(REFERER);
 				}
-				register_error(elgg_echo('campaign_reward:reward:nostocked'));				
-			}		
+				register_error(elgg_echo('campaign_reward:reward:nostocked'));
+			}
 		}
 	}
 }
@@ -230,36 +229,35 @@ function campaign_reward_save ($hook, $type, $returnvalue, $params){
 /*
 Creates a bookobject on user_guid and fundcampaign_guid and a relation with reward_guid.
 
-$params['reward_guid']	
+$params['reward_guid']
 $params['user_guid']
 $params['fundcampaign_guid']
 $params['amount']
 $params['method']
 */
 function campaign_reward_do_books ($hook, $type, $returnvalue, $params){
-	
-	elgg_load_library('elgg:campaign_reward');	
+
+	elgg_load_library('elgg:campaign_reward');
 
 	$is_bookable = campaign_reward_is_stocked ($params['reward_guid']);
 
 	if ($is_bookable) {
-		
-		$book = new ElggObject();	
+
+		$book = new ElggObject();
 		$book->type = 'object';
 		$book->subtype = 'reward_book';
 		$book->owner_guid = $params['user_guid'];
 		$book->fundcampaign_guid = $params['fundcampaign_guid'];
 
 		$book->amount = $params['amount'];
-		$book->method = $params['method'];				
-		$book->contributor =$params['user_guid'];				
+		$book->method = $params['method'];
+		$book->contributor =$params['user_guid'];
 		$book->save();
 		add_entity_relationship ($book->guid, 'reward', $params['reward_guid']);
-		
+
 	}else {
-		register_error(elgg_echo('reward:stock_insuficient_nothing_booked'));	
+		register_error(elgg_echo('reward:stock_insuficient_nothing_booked'));
 	}
-	
 }
 
 function fundraising_books_cron ($hook, $entity_type, $returnvalue, $params) {
@@ -267,19 +265,20 @@ function fundraising_books_cron ($hook, $entity_type, $returnvalue, $params) {
 	//Bankaccount, 10 days
 	$date = new DateTime();
 	$today = $date->getTimestamp();
-	$upper_timestamp = strtotime('-10 days', $today);	
-	
+	$upper_timestamp = strtotime('-10 days', $today);
+
 	$init_date = new DateTime("2013-10-01");
 	$lower_timestamp = $init_date->getTimestamp();
 	$out_books = elgg_get_entities_from_metadata (array (
 			'type' => 'object',
-			'subtype' => 'reward_book',			
+			'subtype' => 'reward_book',
 			'created_time_lower' => $lower_timestamp,
 			'created_time_upper' => $upper_timestamp,
 			'metadataname' => 'method',
 			'metadatavalue' => 'bankaccount',
 		));
 
+	//TODO: must do direct query to avoid bucle?
 	foreach ($out_books as $book) {
 		remove_entity_relationships($book->guid, "reward");
 		$book->delete();
@@ -289,10 +288,10 @@ function fundraising_books_cron ($hook, $entity_type, $returnvalue, $params) {
 	$date = new DateTime();
 	$today = $date->getTimestamp();
 	$upper_timestamp = strtotime('-1 days', $today);
-	
+
 	$init_date = new DateTime("2013-10-01");
 	$lower_timestamp = $init_date->getTimestamp();
-	$out_books = elgg_get_entities (array (
+	$out_books = elgg_get_entities_from_metadata (array (
 			'type' => 'object',
 			'subtype' => 'reward_book',
 			'created_time_lower' => $lower_timestamp,
@@ -300,9 +299,9 @@ function fundraising_books_cron ($hook, $entity_type, $returnvalue, $params) {
 			'metadataname' => 'method',
 			'metadatavalue' => 'bitcoin',
 		));
+	//TODO: must do direct query to avoid bucle?
 	foreach ($out_books as $book) {
-		remove_entity_relationships($book->guid, "reward");	
+		remove_entity_relationships($book->guid, "reward");
 		$book->delete();
 	}
-
 }
