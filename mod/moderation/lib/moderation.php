@@ -4,7 +4,6 @@
  * Gatekeeper for moderation plugin. Only for admins.
  */
 function moderator_gate_keeper() {
-
 	if (elgg_is_admin_logged_in()){
 		return true;
 	}else {
@@ -17,7 +16,6 @@ function moderator_gate_keeper() {
  * Adds a toggle to extra menu for switching between list and gallery views
  */
 function moderation_register_toggle() {
-
 	set_input('list_type', get_input('list_type', 'gallery'));
 
 	$url = elgg_http_remove_url_query_element(current_page_url(), 'list_type');
@@ -45,13 +43,13 @@ function moderation_register_toggle() {
 	));
 
 	return true;
+
 }
 
-/*
+/**
 * Returns the revision on the top of the record of $entity (project or fundcampaign) only if it is "in_progress" state, which is: waiting for being "commited" by admin; or null if none.
 */
 function moderation_get_last_revision($entity) {
-
 	if ($entity) {
 		return current(elgg_get_entities_from_metadata( array(
 			'type' => 'object',
@@ -60,113 +58,29 @@ function moderation_get_last_revision($entity) {
 			'metadata_name' => 'state',
 			'metadata_value' => 'in_progress',
 			'limit' => 1
-			)));		
+			)));
 	}
 	return null;
+
 }
 
-
-/*
+/**
 * Calls to elgg_get_entities_from_metadata to return all revision objects related to $entity (which can be either project or fundcampaign.
 */
 function moderation_get_revisions($entity) {
-
 	$revisions = elgg_get_entities_from_metadata( array(
 		'type' => 'object',
 		'subtype' => 'revision',
 		'container_guid' => $entity->guid,
 		));
-
 	return $revisions;
-}
 
-/*
-* This a user save for already created entites. Saves windows form not directly on $entity but on a revision object.
-* If $entity (project or fundcampaign) has any "in_progress" revision then fill it with $input array of data.
-* If there is not any revision, creates one.
-* Set the $entity's revision state to "in_progress", so admins can "commit" changes.
-*/
-function moderation_do_user_save($entity, $input) {
-
-	$entity_type = $entity->getSubtype();
-
-	$revision = moderation_get_last_revision($entity);
-
-	if (!$revision) {
-		$revision = new ElggObject();
-		$revision->type = 'object';
-		$revision->subtype = 'revision';
-
-		$user = elgg_get_logged_in_user_entity();
-		$revision->owner_guid = $user->guid;
-
-		$revision->container_guid = $entity->guid;
-	}
-
-	foreach($input as $shortname => $value) {
-		if ($entity->$shortname != $value ) {
-			$revision->$shortname = $value;
-		}
-	}
-
-	$revision->state = 'in_progress';
-	$revision->save();
-
-	$entity_type = $entity->getSubtype() ."s";
-	moderation_save_icon($entity, $entity_type, "revision", $revision);
-
-	system_message(elgg_echo("moderation:revision_saved_user"));
-
-	return $entity->getUrl();
-}
-
-/*
-* This is an admin save for "in_progress" revisions. It is suposed that $input array has been populated from the revision object and admin has verified the data; or directly from $entity if new.
-* If there is $revision, set state to "commited".
-* Set $entity state to "commited"
-*/
-function moderation_do_admin_save($entity, $input) {
-
-	$entity_type = $entity->getSubtype();
-
-	//If this fundcampaigns becomes active, deselect other possible active fundcampaign.
-	if($entity_type == "fundcampaign" && $input['is_active'] && !$entity->is_active){
-		elgg_load_library("elgg:fundcampaigns");
-		$entity_old = fundcampaigns_get_active_campaign($entity->container_guid);
-		if ($entity_old) {
-        		$entity_old->is_active = false;
-        		$entity_old->save();
-    		}		
-	}
-
-	foreach($input as $shortname => $value) {
-		if ($entity->$shortname != $value ) {
-			$entity->$shortname = $value;			
-		}
-	}	
-
-	$revision = moderation_get_last_revision($entity);
-
-	$entity_type = $entity->getSubtype() ."s";	
-	moderation_save_icon($entity, $entity_type, "commit", $revision, get_input('discard_icon')=="on");
-	
-	if ($revision) {
-		$revision->state = 'commited';
-		$revision->save();
-	}
-	$entity->state = 'commited';
-	$entity->access_id = $input['access_id'];
-	$entity->save();
-
-	system_message(elgg_echo("moderation:revision_saved"));
-	return 'moderation/main';
 }
 
 /*
 * Get string as the output representation of any field, if there is uncommited changes in $revision then show both fields, just to admin can check. By default, changes will be loaded in output field so admin only has to edit if needs to stash changes.
 */
 function moderation_get_field ($revision, $entity_type, $fieldname, $fieldtype, $fieldvalue) {
-
 	$line_break = '<br />';
 
 	if ($revision->$fieldname) {
@@ -221,58 +135,60 @@ function moderation_get_field_icon ($entity, $revision) {
 
 	if (elgg_is_admin_logged_in()){
 		$output .= elgg_echo("moderation:stash");
-		$output .= elgg_view('input/checkbox', array(							
-						'name' => 'discard_icon',
-					));
+		$output .= elgg_view('input/checkbox', array('name' => 'discard_icon'));
 	}
 	return $output;
-}
 
+}
 
 /*
 * Returns a button for user's to request entity state from state("in_progress") to state("commited"); or false.
 */
 function moderation_get_request_user_button ($entity_guid) {
 
-	$entity = get_entity($entity_guid);
-
-	if ($entity->state == "in_progress") {
-		$request_url = 'action/moderation/request?guid=' . $guid;
-		return elgg_view('output/confirmlink', array(
-			'text' => elgg_echo('moderation:request'),
-			'href' => $request_url,
-			'confirm' => elgg_echo('moderation:requestwarning'),
-			'class' => 'elgg-button elgg-button-save float-alt',
-		));
+	if (!elgg_is_admin_logged_in()) {
+		$entity = get_entity($entity_guid);
+		$revision = moderation_get_last_revision($entity);
+		if ($entity->state == "in_progress" || $revision ->state == "in_progress") {
+			$request_url = 'action/moderation/request?guid=' . $entity_guid;
+			return elgg_view('output/confirmlink', array(
+				'text' => elgg_echo('moderation:request'),
+				'href' => $request_url,
+				'confirm' => elgg_echo('moderation:requestwarning'),
+				'class' => 'elgg-button elgg-button-save float-alt',
+			));
+		}
 	}
 
 	return false;
 
 }
 
-
-/*Manage $entity's saving icon (project or fundcampaing). Updates $entity->icontime or $revision->icontime.
-
-$save_revision:
-	NEW --> upload icon.
-	REVISION --> upload ico but save it as a revison with name: {$entity_guid}revision{$revision_guid}.jpg';
-	COMMIT -->
-		if $has_uploaded_icon then
-			upload icon
-			DESACTIVATED: delete if exists {$entity_guid}'revision{$revision_guid}.jpg';
-		else
-			copy {$entity_guid}revision{$revision_guid}.jpg' to {$entity_guid}.jpg
-$discard_icon:
-	Admin do not allow change icon to revision one.
-
+/** Manage $entity's saving icon (project or fundcampaing). Updates $entity->icontime or $revision->icontime.
+* $ACTION:
+* 	NEW --> upload icon.
+* 	REVISION --> upload ico but save it as a revison with name: {$entity_guid}revision{$revision_guid}.jpg';
+* 	COMMIT -->
+* 		if $has_uploaded_icon then
+* 			upload icon
+* 			DESACTIVATED: delete if exists {$entity_guid}'revision{$revision_guid}.jpg';
+* 		else
+* 			copy {$entity_guid}revision{$revision_guid}.jpg' to {$entity_guid}.jpg
+* $discard_icon:
+* 	Admin do not allow change icon to revision one.
 */
-function moderation_save_icon ($entity, $entity_type, $save_revision, $revision, $discard_icon = false) {
+function moderation_save_icon ($params) {
+	$entity = $params['entity'];
+	$entity_type = $params['plugin_name'];
+	$action = $params['action'];
+	$revision = $params['revision'];
+	$discard_icon = $params['discard_icon'];;
 
 	$has_uploaded_icon = (!empty($_FILES['icon']['type']) && substr_count($_FILES['icon']['type'], 'image/'));
 
-	if ($has_uploaded_icon || $save_revision == "commit") {
+	if ($has_uploaded_icon || $action == "commit") {
 
-		switch ($save_revision){
+		switch ($action){
 			case "new":
 				$prefix_to_upload = "{$entity_type}/" . $entity->guid;
 				$entity->icontime = time();
@@ -304,7 +220,6 @@ function moderation_save_icon ($entity, $entity_type, $save_revision, $revision,
 		}
 
 		if ($prefix_to_upload) {
-
 			elgg_load_library("elgg:{$entity_type}");
 			$icon_sizes = elgg_get_config("{$entity_type}_icon_sizes");
 
@@ -343,7 +258,6 @@ function moderation_save_icon ($entity, $entity_type, $save_revision, $revision,
 		if ($prefix_copy_from) {
 			$sizes = array('', 'tiny', 'small', 'medium', 'large');
 			foreach ($sizes as $size) {
-
 				$filehandler = new ElggFile();
 				$filehandler->setFilename("{$prefix_copy_from}{$size}.jpg");
 				$filehandler->owner_guid = $entity->owner_guid;
@@ -371,6 +285,7 @@ function moderation_save_icon ($entity, $entity_type, $save_revision, $revision,
 		}		
 	}
 	return true;
+
 }
 
 

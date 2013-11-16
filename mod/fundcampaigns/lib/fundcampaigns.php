@@ -24,7 +24,6 @@ function fundcampaigns_get_from_alias($alias) {
 	return false;
 }
 
-
 /**
  * Prepares variables for the project edit form view.
  *
@@ -38,7 +37,9 @@ function fundcampaigns_prepare_form_vars($fundcampaign = null) {
 		'alias' => '',
 		'vis' => null,
 		'guid' => null,
-		'entity' => null
+		'entity' => null,
+		'num_periods' => elgg_get_plugin_setting("num_periods", "fundcampaigns"),
+		'periods_duration' => elgg_get_plugin_setting("periods_duration", "fundcampaigns"),
 	);
 
 	// handle customizable profile fields
@@ -46,7 +47,9 @@ function fundcampaigns_prepare_form_vars($fundcampaign = null) {
 
 	if ($fields) {
 		foreach ($fields as $name => $type) {
-			$values[$name] = '';
+			if (!isset($values[$name])) {
+				$values[$name] = '';
+			}
 		}
 	}
 
@@ -68,7 +71,7 @@ function fundcampaigns_prepare_form_vars($fundcampaign = null) {
 		}
 
 		if ($fundcampaign->access_id != ACCESS_PUBLIC && $fundcampaign->access_id != ACCESS_LOGGED_IN) {
-			// fundcampaign only access - this is done to handle access not created when project is created
+			// fundcampaign only access - this is done to handle access not created when fundcampaign is created
 			$values['vis'] = ACCESS_PRIVATE;
 		} else {
 			$values['vis'] = $fundcampaign->access_id;
@@ -197,7 +200,7 @@ function fundcampaigns_get_resized_and_cropped_image_from_existing_file($input_n
 }
 
 function fundcampaigns_is_active_campaign ($fundcampaign) {
-	$date = date('Y-m-d');	
+	$date = date('Y-m-d');
 	return $fundcampaign->is_active && $date > $fundcampaign->start_date;
 }
 
@@ -211,5 +214,5 @@ function fundcampaigns_get_active_campaign ($guid = 0) {
 		'metadata_value' => true,
 		'limit' => 1,
 	)));
-	
+
 }

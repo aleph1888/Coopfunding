@@ -15,8 +15,6 @@ function fundcampaigns_init() {
 
 	elgg_register_entity_type('fundcampaign');
 
-	elgg_register_plugin_hook_handler('register', 'menu:owner_block', 'fundcampaigns_block_menu');
-
 	elgg_set_config('fundcampaigns_icon_sizes', array(
 		'tiny' => array('w' => 50, 'h' => 50),
 		'small' => array('w' => 50, 'h' => 50),
@@ -25,20 +23,17 @@ function fundcampaigns_init() {
 	));
 
 	$root = dirname(__FILE__);
-
 	elgg_register_library('elgg:fundcampaigns', "$root/lib/fundcampaigns.php");
 
 	elgg_extend_view('css/elgg', 'fundcampaigns/css');
 
 	elgg_register_page_handler('fundcampaigns', 'fundcampaigns_page_handler');
 
+	elgg_register_page_handler('fundcampaignicon', 'fundcampaigns_icon_handler');
 	elgg_register_entity_url_handler('object', 'fundcampaign', 'fundcampaigns_url');
 
 	elgg_register_plugin_hook_handler('entity:icon:url', 'object', 'fundcampaigns_icon_url_override');
-
-	elgg_register_event_handler('pagesetup', 'system', 'fundcampaigns_setup_sidebar_menus');
-
-	elgg_register_page_handler('fundcampaignicon', 'fundcampaigns_icon_handler');
+	elgg_register_plugin_hook_handler('register', 'menu:owner_block', 'fundcampaigns_block_menu');
 
 	$action_path = elgg_get_plugins_path() . 'fundcampaigns/actions';
 	elgg_register_action("fundcampaigns/edit", "$action_path/edit.php");
@@ -57,19 +52,16 @@ function fundcampaigns_fields_setup() {
 		'paymethodCES' => 'text',
 
 		'start_date' => 'date',
-		'activate_second_period' => 'checkbox',
-		'periods_duration' => 'text', //By default= 40 days
-
-		'minimum_amount' => 'text', //%of total amount
-		'total_amount' => 'text', //%of total_amount		
-		
-	    //end_date = start_date + [(periods_duratoin) + (iif(activate_period2, periods_duration, 0)]
+		'num_periods' => 'text', 
+		'periods_duration' => 'text',
+		'minimum_amount' => 'text', //%of total amount, will be used together with num_periods and periods_duration to desactive fundcampaig if amount not achived
+		'total_amount' => 'text', //%of total_amount, just metadata.
 	);
 
-    $profile_defaults = elgg_trigger_plugin_hook('profile:fields', 'fundcampaigns', NULL, $profile_defaults);
+	$profile_defaults = elgg_trigger_plugin_hook('profile:fields', 'fundcampaigns', NULL, $profile_defaults);
 
-	elgg_set_config('fundcampaigns', $profile_defaults);
-	$fundcampaign_profile_fields = elgg_get_config('fundcampaigns');
+	elgg_set_config('fundcampaign', $profile_defaults);
+	$fundcampaign_profile_fields = elgg_get_config('fundcampaign');
 
 	// register any tag metadata names
 	foreach ($profile_defaults as $name => $type) {
@@ -102,45 +94,34 @@ function fundcampaigns_page_handler($page, $handler) {
 	}
 
 	elgg_push_breadcrumb(elgg_echo('projects'), "projects/all");
-   
-    
+
 	switch ($page[0]) {
-	    case 'all';
-	        return false;
+		case 'all';
+			return false;
 		case 'owner':
-		    
 			elgg_set_page_owner_guid($page[1]);
-			set_input('project', $page[1]);
-			
+			set_input('project', $page[1]);			
 			$project = get_entity($page[1]);
 			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
 			fundcampaigns_register_toggle();
 			fundcampaigns_handle_owner_page($page[1]);
 			break;
 		case 'view':
-		
 			if (!$fundcampaign) { $fundcampaign = get_entity($page[1]);}
 			$project = get_entity($fundcampaign->container_guid);
 			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
-			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
-			
+			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));			
 			fundcampaigns_handle_view_page($fundcampaign->guid);
 			break;
 		case 'edit':
-		    
-		    $fundcampaign = fundcampaigns_get_from_alias($page[1]);
-		    $project = get_entity( $fundcampaign->container_guid);
-		    
-		    elgg_set_page_owner_guid($project->guid);
-		    
-		    elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
-		    elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
-		   
+			$fundcampaign = fundcampaigns_get_from_alias($page[1]);
+			$project = get_entity( $fundcampaign->container_guid);
+			elgg_set_page_owner_guid($project->guid);
+			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
+			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
 			set_input('fundcampaign', $fundcampaign->guid);
-			set_input('project', $fundcampaign->container_guid);
-			
-			fundcampaigns_handle_edit_page('edit',$fundcampaign->guid);
-			
+			set_input('project', $fundcampaign->container_guid);			
+			fundcampaigns_handle_edit_page('edit',$fundcampaign->guid);			
 			break;
 		case 'add':
 			$project = get_entity($page[1]);
@@ -152,10 +133,12 @@ function fundcampaigns_page_handler($page, $handler) {
 			return false;
 	}
 	return true;
+
 }
 
 function fundcampaigns_url($entity) {
 	return "fundcampaigns/view/{$entity->guid}";
+
 }
 
 function fundcampaigns_handle_owner_page($project_guid) {
@@ -190,6 +173,7 @@ function fundcampaigns_handle_owner_page($project_guid) {
 	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($title, $body);
+
 }
 
 function fundcampaigns_handle_view_page($guid) {
@@ -210,14 +194,12 @@ function fundcampaigns_handle_view_page($guid) {
 	fundcampaigns_register_profile_buttons($fundcampaign);
 
 	if (fundcampaigns_is_active_campaign ($fundcampaign) ) {
-	    elgg_trigger_plugin_hook('fundcampaigns:profilebuttons', 'fundcampaign', $fundcampaign, array('entity' => $fundcampaign));
+		elgg_trigger_plugin_hook('fundcampaigns:profilebuttons', 'fundcampaign', $fundcampaign, array('entity' => $fundcampaign));
 	}
 
 	$content = elgg_view('fundcampaigns/profile/layout', array('entity' => $fundcampaign));
 	$sidebar .= elgg_view('fundcampaigns/sidebar/contribute', array('entity' => $fundcampaign));
-    
-	$sidebar .= elgg_trigger_plugin_hook('fundcampaigns:sidebarmenus', 'fundcampaign', $fundcampaign);
- 
+	$sidebar .= elgg_trigger_plugin_hook('fundcampaigns:sidebarmenus', 'fundcampaign', $fundcampaign); 
 	$sidebar .= elgg_view('fundcampaigns/sidebar/members', array('entity' => $fundcampaign));
 
 	$params = array(
@@ -226,9 +208,11 @@ function fundcampaigns_handle_view_page($guid) {
 		'title' => $fundcampaign->name,
 		'filter' => '',
 	);
+
 	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($fundcampaign->name, $body);
+
 }
 
 function fundcampaigns_handle_edit_page($page, $guid = 0) {
@@ -236,7 +220,6 @@ function fundcampaigns_handle_edit_page($page, $guid = 0) {
 	gatekeeper();
 
 	if ($page == 'add') {
-	
 		$title = elgg_echo('fundcampaigns:add');
 		elgg_push_breadcrumb($title);
 		$content = elgg_view('fundcampaigns/edit');
@@ -244,15 +227,13 @@ function fundcampaigns_handle_edit_page($page, $guid = 0) {
 		$title = elgg_echo("fundcampaigns:edit");
 		$fundcampaign = get_entity($guid);
 
-		if ($fundcampaign && $fundcampaign->canEdit()) {
-	
+		if ($fundcampaign && $fundcampaign->canEdit()) {	
 			elgg_push_breadcrumb($fundcampaign->name, $fundcampaign->getURL());
 			elgg_push_breadcrumb($title);
 			$content = elgg_view("fundcampaigns/edit", array('entity' => $fundcampaign));
 		} else {
 			$content = elgg_echo('fundcampaigns:noaccess');
 		}
-
 	}
 
 	if (elgg_is_admin_logged_in() && elgg_is_active_plugin("moderation")) {
@@ -267,14 +248,6 @@ function fundcampaigns_handle_edit_page($page, $guid = 0) {
 	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($title, $body);
-}
-
-/**
- * Configure the fundcampaigns sidebar menu. Triggered on page setup
- *
- */
-function fundcampaigns_setup_sidebar_menus() {
-
 
 }
 
@@ -285,6 +258,7 @@ function fundcampaigns_block_menu($hook, $type, $return, $params) {
 	$return[] = new ElggMenuItem('fundcampaigns', $text, $url);
 
 	return $return;
+
 }
 
 function fundcampaigns_register_toggle() {
@@ -314,8 +288,8 @@ function fundcampaigns_register_toggle() {
 		'title' => elgg_echo("file:list:$list_type"),
 		'priority' => 1000,
 	));
-}
 
+}
 
 function fundcampaigns_register_profile_buttons($fundcampaign) {
 
@@ -323,9 +297,8 @@ function fundcampaigns_register_profile_buttons($fundcampaign) {
 
 	if ($fundcampaign->canEdit()) {
 
-	    $url = elgg_get_site_url() . "fundcampaigns/edit/{$fundcampaign->alias}";
-	    $actions[$url] = 'fundcampaigns:edit';
-	
+		$url = elgg_get_site_url() . "fundcampaigns/edit/{$fundcampaign->alias}";
+		$actions[$url] = 'fundcampaigns:edit';
 	}
 
 	if ($actions) {
@@ -338,6 +311,7 @@ function fundcampaigns_register_profile_buttons($fundcampaign) {
 			));
 		}
 	}
+
 }
 
 function fundcampaigns_icon_handler($page) {
@@ -353,6 +327,7 @@ function fundcampaigns_icon_handler($page) {
 	$plugin_dir = elgg_get_plugins_path();
 	include("$plugin_dir/fundcampaigns/icon.php");
 	return true;
+
 }
 
 function fundcampaigns_icon_url_override($hook, $type, $returnvalue, $params) {
@@ -367,4 +342,5 @@ function fundcampaigns_icon_url_override($hook, $type, $returnvalue, $params) {
 	}
 
 	return "mod/fundcampaigns/graphics/default{$size}.gif";
+
 }

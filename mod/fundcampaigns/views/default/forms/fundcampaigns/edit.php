@@ -65,7 +65,7 @@ if ($moderate) {
 </div>
 <?php
 
-$fundcampaign_profile_fields = elgg_get_config('fundcampaigns');
+$fundcampaign_profile_fields = elgg_get_config('fundcampaign');
 if ($fundcampaign_profile_fields > 0) {
 	foreach ($fundcampaign_profile_fields as $shortname => $valtype) {
 		$line_break = '<br />';
@@ -83,6 +83,7 @@ if ($fundcampaign_profile_fields > 0) {
 				'name' => $shortname,
 				'value' => elgg_extract($shortname, $vars)
 			));
+
 			echo '</div>';
 		}
 	}
@@ -90,8 +91,8 @@ if ($fundcampaign_profile_fields > 0) {
 
 if (elgg_is_admin_logged_in()) {
 	$active_options = array(
-		true => elgg_echo('fundcampaigns:active'),
-		false => elgg_echo("fundcampaigns:inactive")
+	true => elgg_echo('fundcampaigns:active'),
+	false => elgg_echo("fundcampaigns:inactive")
 	);
 ?>
 

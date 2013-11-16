@@ -107,19 +107,139 @@ function moderation_handle_main_page() {
 */
 function moderation_do_save ($hook, $type, $returnvalue, $params) {
 
-	elgg_load_library('elgg:moderation');
+	$entity_in = $params['entity'];
+	$input =  $params['input'];
+	$is_new_entity = $params['is_new'];
+	$entity_plugin_name = $params["plugin_name"];
 
-	$entity = $params['entity'];
-	$input = $params['input'];
+	if (!$entity_in) {
+		register_error(elgg_echo("moderation:nothingtosave:"));
+		forward(REFERER);
+	}
 
-	if ($entity) {
-		if (elgg_is_admin_logged_in()){
-			return moderation_do_admin_save($entity, $input);
-		} else {
-			return moderation_do_user_save($entity, $input);
+	$entity_update = $entity_in;
+	$entity_group = $entity_in;
+
+	if ($entity_in->getSubtype() == "revision") {
+		$entity_group = get_entity($entity_in->container_guid);
+		$return_url = $entity_container->getURL();
+		$action = "revision";
+	} else {
+		if (!$entity_in->state) {
+			$action = "new";			
+		} elseif ($entity_in->state == "in_progress") {
+			$action = "new";
+		} elseif ($entity_in->state == "request") {
+			$action = "commit";
+		} elseif ($entity_in->state == "commited") {
+			elgg_load_library("elgg:moderation");
+			$revision = moderation_get_last_revision($entity_in);
+			if (!$revision) {
+				$revision = new ElggObject();
+				$revision->type = 'object';
+				$revision->subtype = 'revision';
+				
+				$revision->owner_guid = $entity_in->owner_guid;
+				$revision->container_guid = $entity_in->guid;
+			}
+			$entity_update = $revision;
+			$action = "revision";
+			/*
+			if ($entity_in->getSubtype() == 'fundcampaign') {
+				#todo especific job
+			}elseif ($entity_in->getSubtype() == 'project') {
+				#todo especific job
+			}
+			*/
+		}
+	}
+	
+	elgg_load_library("elgg:{$entity_plugin_name}");
+	
+	if (!isset($input['alias'])) {
+		register_error(elgg_echo("{$entity_plugin_name}:alias:missing"));
+		forward(REFERER);
+	} elseif (!preg_match("/^[a-zA-Z0-9\-]{2,32}$/", $input['alias'])) {
+		register_error(elgg_echo("{$entity_plugin_name}:alias:invalidchars"));
+		forward(REFERER);
+	} elseif ($entity_in->alias != $input['alias'] && call_user_func("{$entity_plugin_name}_get_from_alias", $input['alias'])) {
+		register_error(elgg_echo("{$entity_plugin_name}:already_used"));
+		forward(REFERER);
+	}
+
+	$map_to_group_object = elgg_is_admin_logged_in() && $action == "revision";
+	foreach($input as $shortname => $value) {
+		// update access collection name if name changes				
+		if (!$is_new_entity && $shortname == 'name' && $value != $entity_group->name) {
+			$entity_name = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+			$string_to_sanatice = elgg_echo("{$entity_plugin_name}:{$entity_group->getSubtype()}");
+			$ac_name = sanitize_string($string_to_sanatice . ": " . $entity_name);
+			$acl = get_access_collection($entity_group->group_acl);
+			if ($acl) {
+				// @todo Elgg api does not support updating access collection name
+				$db_prefix = elgg_get_config('dbprefix');
+				$query = "UPDATE {$db_prefix}access_collections SET name = '$ac_name'
+					WHERE id = $entity_group->group_acl";
+				update_data($query);
+			}
+		}
+		if ($entity_update->$shortname != $value) {
+			$entity_update->$shortname = $value;
+			if ($map_to_group_object) {
+				$entity_group->$shortname = $value;
+			}
+		}
+	}
+	// Validate create
+	if (!$entity_update->name) {
+		register_error(elgg_echo("{$entity_plugin_name}:notitle"));
+		forward(REFERER);
+	}
+		
+	#control user who do save.
+	if (elgg_is_admin_logged_in()) {
+		$entity_update->state = 'commited';
+		$info_message = elgg_echo('moderation:saved:commited');
+		$action = "commit";
+		if ($map_to_group_object) {
+			$entity_group->save();
 		}
 	} else {
-		return REFERER;
+		$entity_update->state = 'in_progress';
+		$info_message = elgg_echo('moderation:saved:remember_ask_for_commit');
+	}	
+	
+	$entity_update->save();
+
+	
+	$params = array (
+		'entity' => $entity_group,
+		'plugin_name' => $entity_plugin_name,
+		'revision' => $entity_update,//if this object is not subtype("revision") will be ignored
+		'action' => $action,
+		'discard_icon' => get_input('discard_icon')
+		);
+	elgg_load_library("elgg:moderation");
+	moderation_save_icon($params);
+
+	system_message(elgg_echo($info_message));
+
+	if (!$return_url) {
+		 $return_url = $entity_in->getURL();
 	}
+	return $return_url;
+
+/*
+#TODO OPTIONS
+$tool_options = elgg_get_config("{$entity_plugin_name}_tool_options");
+if ($tool_options) {
+	foreach ($tool_options as $entity_update_option) {
+		$option_toggle_name = $entity_update_option->name . "_enable";
+		$option_default = $entity_update_option->default_on ? 'yes' : 'no';
+		$entity_update->$option_toggle_name = get_input($option_toggle_name, $option_default);
+	}
+}*/
+
+#TODO CHANGE OWNER cascade for fundcampaigns.
 }
 
