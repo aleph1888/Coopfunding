@@ -26,15 +26,18 @@ echo "<hr>";
 	echo '<img id="bitcoin_qrcode">';
 	echo '</div>';
 
-	echo '<div>';
-	echo elgg_echo("fundraising:bankaccount:message");
-	echo '</div>';
+	$user = elgg_get_logged_in_user_entity();
+	if ($user) {
+		echo '<div>';
+		echo elgg_echo("fundraising:bankaccount:message");
+		echo '</div>';
 
-	echo elgg_view('input/submit', array(
-		'name' => 'method',
-                'value' => elgg_echo('fundraising:contribute:button:method', array('bitcoin')),
-	));
-echo "</div>";
+		echo elgg_view('input/submit', array(
+			'name' => 'method',
+		        'value' => elgg_echo('fundraising:contribute:button:method', array('bitcoin')),
+		));
+	}
+	echo "</div>";
 
 
 
