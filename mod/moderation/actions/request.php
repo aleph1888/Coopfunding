@@ -20,7 +20,7 @@ if ($entity) {
 		$entity->state = 'request';
 
 		system_message(elgg_echo('moderation:senttoverify'));
-		forward($entity->getUrl());
+		forward($entity_group->getUrl());
 	}
 }
 

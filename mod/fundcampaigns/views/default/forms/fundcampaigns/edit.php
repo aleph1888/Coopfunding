@@ -12,11 +12,19 @@ extract($vars, EXTR_IF_EXISTS);
 
 $moderate = elgg_is_active_plugin('moderation');
 if ($moderate) {
-	elgg_load_library('elgg:moderation');
-	$revision = moderation_get_last_revision($entity);
+	elgg_load_library('elgg:moderation');	
+	$revision = moderation_get_last_revision($entity);	
+	//var_dump($revision->state);exit();
+	if ($entity->state == "request" || ($revision && $revision->state == "request")) {		
+		if (!elgg_is_admin_logged_in()) {
+			register_error(elgg_echo("moderation:request_still_waiting_for_moderation"));
+			forward(REFERER);
+		}
+	} 
+
 	if ($revision &&  $revision->icontime) {
 		$is_ico_changed = $revision->icontime != $entity->icontime;
-	}
+	}	
 }
 ?>
 
@@ -174,7 +182,10 @@ if ($entity) {
 	));
 }
 
-echo elgg_view('input/submit', array('value' => elgg_echo('save')));
+$revision_request = moderation_get_last_revision ($entity);
+if (elgg_is_admin_logged_in() || ($entity->state != "request" && $revision_request->state != "request")) {
+	echo elgg_view('input/submit', array('value' => elgg_echo('save')));
+}
 
 $showDeleteButton = elgg_is_active_plugin ("moderation") && elgg_is_admin_logged_in();
 if ($entity && $showDeleteButton) {

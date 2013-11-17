@@ -37,7 +37,7 @@ $etag = $icontime . $guid;
 
 
 /* @var ElggObject $fundcampaign */
-if (!($fundcampaign instanceof ElggObject)) {
+if (!($fundcampaign instanceof ElggGroup)) {
 	header("HTTP/1.1 404 Not Found");
 	exit;
 }

@@ -50,13 +50,14 @@ function moderation_register_toggle() {
 * Returns the revision on the top of the record of $entity (project or fundcampaign) only if it is "in_progress" state, which is: waiting for being "commited" by admin; or null if none.
 */
 function moderation_get_last_revision($entity) {
+	
 	if ($entity) {
 		return current(elgg_get_entities_from_metadata( array(
 			'type' => 'object',
 			'subtype' => 'revision',
 			'container_guid' => $entity->guid,
 			'metadata_name' => 'state',
-			'metadata_value' => 'in_progress',
+			'metadata_value' => array("in_progress", "request"),
 			'limit' => 1
 			)));
 	}
@@ -81,10 +82,14 @@ function moderation_get_revisions($entity) {
 * Get string as the output representation of any field, if there is uncommited changes in $revision then show both fields, just to admin can check. By default, changes will be loaded in output field so admin only has to edit if needs to stash changes.
 */
 function moderation_get_field ($revision, $entity_type, $fieldname, $fieldtype, $fieldvalue) {
+	
 	$line_break = '<br />';
 
-	if ($revision->$fieldname) {
+	$valNew = $revision->$fieldname;
+	if ($valNew && ($valNew != $fieldvalue)) {
 		$class = "moderation-edited";
+	} else {
+		$valNew = $fieldvalue;
 	}
 
 	$output = "<div><label class='{$class}'>";
@@ -98,10 +103,6 @@ function moderation_get_field ($revision, $entity_type, $fieldname, $fieldtype, 
 		));
 	}
 
-	$valNew = $revision->$fieldname;
-	if (!$valNew) {
-		$valNew = $fieldvalue;
-	}
 	$output .=  elgg_view("input/{$fieldtype}", array(
 			'name' => $fieldname,
 			'value' => $valNew
@@ -149,8 +150,10 @@ function moderation_get_request_user_button ($entity_guid) {
 	if (!elgg_is_admin_logged_in()) {
 		$entity = get_entity($entity_guid);
 		$revision = moderation_get_last_revision($entity);
-		if ($entity->state == "in_progress" || $revision ->state == "in_progress") {
-			$request_url = 'action/moderation/request?guid=' . $entity_guid;
+		if ($entity->state == "in_progress" || $revision ->state == "in_progress") {			
+			$request_guid = $entity_guid;
+			if ($revision) { $request_guid = $revision->guid;}
+			$request_url = 'action/moderation/request?guid=' . $request_guid;
 			return elgg_view('output/confirmlink', array(
 				'text' => elgg_echo('moderation:request'),
 				'href' => $request_url,
@@ -221,7 +224,8 @@ function moderation_save_icon ($params) {
 
 		if ($prefix_to_upload) {
 			elgg_load_library("elgg:{$entity_type}");
-			$icon_sizes = elgg_get_config("{$entity_type}_icon_sizes");
+			
+			$icon_sizes = elgg_get_config("group_icon_sizes");
 
 			$filehandler = new ElggFile();
 			$filehandler->owner_guid = $entity->owner_guid;
@@ -234,7 +238,7 @@ function moderation_save_icon ($params) {
 			$sizes = array('tiny', 'small', 'medium', 'large');
 			$thumbs = array();
 			foreach ($sizes as $size) {
-				$thumbs[$size] = call_user_func("{$entity_type}_get_resized_and_cropped_image_from_existing_file", $filename,
+				$thumbs[$size] = call_user_func("moderation_get_resized_and_cropped_image_from_existing_file", $filename,
 					$icon_sizes[$size]['w'],
 					$icon_sizes[$size]['h']
 				);
@@ -289,3 +293,104 @@ function moderation_save_icon ($params) {
 }
 
 
+/**
+ * Gets the jpeg contents of the resized and cropped version of an already
+ * uploaded image (Returns false if the file was not an image)
+ *
+ * @param string $input_name The name of the file on the disk
+ * @param int    $new_width   The desired width of the resized image
+ * @param int    $new_height  The desired height of the resized image
+ * 
+ * @return false|mixed The contents of the resized image, or false on failure
+ */
+function moderation_get_resized_and_cropped_image_from_existing_file($input_name, $new_width, $new_height) {
+
+	// Get the size information from the image
+	$imgsizearray = getimagesize($input_name);
+	if ($imgsizearray == FALSE) {
+		return FALSE;
+	}
+
+	$source_width = $imgsizearray[0];
+	$source_height = $imgsizearray[1];
+
+	$source_aspect_ratio = $source_width / $source_height;
+	$new_aspect_ratio = $new_width / $new_height;
+
+	if ($new_width > $source_width) {
+		$new_width = $source_width;
+		$new_height = $source_width / $new_aspect_ratio;
+	}
+	if ($new_height > $source_height) {
+		$new_height = $source_height;
+		$new_width = $source_height * $new_aspect_ratio;
+	}
+
+	$accepted_formats = array(
+		'image/jpeg' => 'jpeg',
+		'image/pjpeg' => 'jpeg',
+		'image/png' => 'png',
+		'image/x-png' => 'png',
+		'image/gif' => 'gif'
+	);
+
+	// make sure the function is available
+	$load_function = "imagecreatefrom" . $accepted_formats[$imgsizearray['mime']];
+	if (!is_callable($load_function)) {
+		return FALSE;
+	}
+
+	// load original image
+	$original_image = $load_function($input_name);
+	if (!$original_image) {
+		return FALSE;
+	}
+
+	if ($source_aspect_ratio > $new_aspect_ratio) {
+		$temp_height = $new_height;
+		$temp_width = (int) ($new_height * $source_aspect_ratio);
+	} else {
+		$temp_width = $new_width;
+		$temp_height = (int) ($new_width / $source_aspect_ratio);
+	}
+
+	// Resize the image into a temporary GD image
+	$temp_image = imagecreatetruecolor($temp_width, $temp_height);
+	$temp_rtn_code = imagecopyresampled(
+		$temp_image,
+		$original_image,
+		0, 0,
+		0, 0,
+		$temp_width, $temp_height,
+		$source_width, $source_height
+	);
+	if (!$temp_rtn_code) {
+		return FALSE;
+	}
+
+	// Copy cropped region from temporary image into the desired GD image
+	$x0 = ($temp_width - $new_width) / 2;
+	$y0 = ($temp_height - $new_height) / 2;
+	$new_image = imagecreatetruecolor($new_width, $new_height);
+	$rtn_code = imagecopy(
+		$new_image,
+		$temp_image,
+		0, 0,
+		$x0, $y0,
+		$new_width, $new_height
+	);
+	if (!$rtn_code) {
+		return FALSE;
+	}
+
+	// grab a compressed jpeg version of the image
+	ob_start();
+	imagejpeg($new_image, NULL, 90);
+	$jpeg = ob_get_clean();
+
+	imagedestroy($new_image);
+	imagedestroy($temp_image);
+	imagedestroy($original_image);
+
+	return $jpeg;
+}

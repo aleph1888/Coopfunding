@@ -221,12 +221,13 @@ function projects_handle_edit_page($page, $guid = 0) {
 	}
 	
 	if (elgg_is_admin_logged_in() && elgg_is_active_plugin("moderation")) {
-		$sidebar = elgg_view('moderation/sidebar');
+		$sidebar = elgg_view('moderation/sidebar', array('entity' => $project));
 	}
 
 	$params = array(
 		'content' => $content,
 		'title' => $title,
+		'sidebar' => $sidebar,
 		'filter' => '',
 	);
 	$body = elgg_view_layout('content', $params);
@@ -570,104 +571,4 @@ function projects_prepare_form_vars($project = null) {
 	return $values;
 }
 
-/**
- * Gets the jpeg contents of the resized and cropped version of an already
- * uploaded image (Returns false if the file was not an image)
- *
- * @param string $input_name The name of the file on the disk
- * @param int    $new_width   The desired width of the resized image
- * @param int    $new_height  The desired height of the resized image
- * 
- * @return false|mixed The contents of the resized image, or false on failure
- */
-function projects_get_resized_and_cropped_image_from_existing_file($input_name, $new_width, $new_height) {
 
-	// Get the size information from the image
-	$imgsizearray = getimagesize($input_name);
-	if ($imgsizearray == FALSE) {
-		return FALSE;
-	}
-
-	$source_width = $imgsizearray[0];
-	$source_height = $imgsizearray[1];
-
-	$source_aspect_ratio = $source_width / $source_height;
-	$new_aspect_ratio = $new_width / $new_height;
-
-	if ($new_width > $source_width) {
-		$new_width = $source_width;
-		$new_height = $source_width / $new_aspect_ratio;
-	}
-	if ($new_height > $source_height) {
-		$new_height = $source_height;
-		$new_width = $source_height * $new_aspect_ratio;
-	}
-
-	$accepted_formats = array(
-		'image/jpeg' => 'jpeg',
-		'image/pjpeg' => 'jpeg',
-		'image/png' => 'png',
-		'image/x-png' => 'png',
-		'image/gif' => 'gif'
-	);
-
-	// make sure the function is available
-	$load_function = "imagecreatefrom" . $accepted_formats[$imgsizearray['mime']];
-	if (!is_callable($load_function)) {
-		return FALSE;
-	}
-
-	// load original image
-	$original_image = $load_function($input_name);
-	if (!$original_image) {
-		return FALSE;
-	}
-
-	if ($source_aspect_ratio > $new_aspect_ratio) {
-		$temp_height = $new_height;
-		$temp_width = (int) ($new_height * $source_aspect_ratio);
-	} else {
-		$temp_width = $new_width;
-		$temp_height = (int) ($new_width / $source_aspect_ratio);
-	}
-
-	// Resize the image into a temporary GD image
-	$temp_image = imagecreatetruecolor($temp_width, $temp_height);
-	$temp_rtn_code = imagecopyresampled(
-		$temp_image,
-		$original_image,
-		0, 0,
-		0, 0,
-		$temp_width, $temp_height,
-		$source_width, $source_height
-	);
-	if (!$temp_rtn_code) {
-		return FALSE;
-	}
-
-	// Copy cropped region from temporary image into the desired GD image
-	$x0 = ($temp_width - $new_width) / 2;
-	$y0 = ($temp_height - $new_height) / 2;
-	$new_image = imagecreatetruecolor($new_width, $new_height);
-	$rtn_code = imagecopy(
-		$new_image,
-		$temp_image,
-		0, 0,
-		$x0, $y0,
-		$new_width, $new_height
-	);
-	if (!$rtn_code) {
-		return FALSE;
-	}
-
-	// grab a compressed jpeg version of the image
-	ob_start();
-	imagejpeg($new_image, NULL, 90);
-	$jpeg = ob_get_clean();
-
-	imagedestroy($new_image);
-	imagedestroy($temp_image);
-	imagedestroy($original_image);
-
-	return $jpeg;
-}

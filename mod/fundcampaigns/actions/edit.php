@@ -1,6 +1,6 @@
 <?php
 /**
- * Elgg Fundcampaigns plugin edit action.
+ * Elgg fundcampaigns plugin edit action.
  *
  * @package Coopfunding
  * @subpackage fundcampaigns
@@ -17,11 +17,14 @@ function profile_array_decoder(&$v) {
 
 $user = elgg_get_logged_in_user_entity();
 
-$input['name'] = htmlspecialchars(get_input('name', '', false), ENT_QUOTES, 'UTF-8');
-$input['alias'] = htmlspecialchars(get_input('alias', '', false), ENT_QUOTES, 'UTF-8');
+elgg_make_sticky_form('fundcampaigns');
 
 $fundcampaign_guid = (int)get_input('fundcampaign_guid');
-var_dump($fundcampaign_guid); exit();
+$input = array();
+$input['name'] = htmlspecialchars(get_input('name', '', false), ENT_QUOTES, 'UTF-8');
+$input['alias'] = htmlspecialchars(get_input('alias', '', false), ENT_QUOTES, 'UTF-8');
+$input['access_id'] = get_input('vis');
+
 if ($fundcampaign_guid) {
 	$fundcampaign = new ElggGroup($fundcampaign_guid);
 	if (!$fundcampaign->canEdit()) {
@@ -33,19 +36,21 @@ if ($fundcampaign_guid) {
 	$fundcampaign->subtype = 'fundcampaign';
 	$is_new_fundcampaign = true;
 
-	$project = get_entity('project');
+	$project = get_entity(get_input('project'));
+	
 	$fundcampaign->container_guid = $project->guid;
 	$fundcampaign->owner_guid = $project->owner_guid;
+	
+	$fundcampaign->name = $input['name'];
 	$fundcampaign->save();
-
+	
 	$fundcampaign->join($user);
 
 	$fundcampaign->membership = ACCESS_PRIVATE;
 	$fundcampaign->access_id = ACCESS_PRIVATE;
 }
 
-$input = array();
-foreach (elgg_get_config("fundcampaigns") as $shortname => $valuetype) {
+foreach (elgg_get_config("fundcampaign") as $shortname => $valuetype) {
 	$input[$shortname] = get_input($shortname);
 
 	// @todo treat profile fields as unescaped: don't filter, encode on output
@@ -58,17 +63,59 @@ foreach (elgg_get_config("fundcampaigns") as $shortname => $valuetype) {
 		$input[$shortname] = string_to_tag_array($input[$shortname]);
 	}
 }
-var_dump("reate"); exit();
-$forward_url = "404";
-if (elgg_is_active_plugin('moderation')) {
-	$params = array ('plugin_name' => 'fundcampaigns', 'entity'=> $fundcampaign, 'is_new'=> $is_new_fundcampaign, 'input' => $input); 
-	$forward_url = elgg_trigger_plugin_hook('moderation:save', 'entity', $params);
+
+// TODO CHANGE OWNER
+/*$old_owner_guid = $is_new_fundcampaign ? 0 : $fundcampaign->owner_guid;
+$new_owner_guid = (int) get_input('owner_guid');
+
+$owner_has_changed = false;
+$old_icontime = null;
+if (!$is_new_fundcampaign && $new_owner_guid && $new_owner_guid != $old_owner_guid) {
+	// verify new owner is member and old owner/admin is logged in
+	if (is_fundcampaign_member($fundcampaign_guid, $new_owner_guid) && ($old_owner_guid == $user->guid || $user->isAdmin())) {
+		$fundcampaign->owner_guid = $new_owner_guid;
+		$fundcampaign->container_guid = $new_owner_guid;
+
+		$metadata = elgg_get_metadata(array(
+			'guid' => $fundcampaign_guid,
+			'limit' => false,
+		));
+		if ($metadata) {
+			foreach ($metadata as $md) {
+				if ($md->owner_guid == $old_owner_guid) {
+					$md->owner_guid = $new_owner_guid;
+					$md->save();
+				}
+			}
+		}
+
+		// @todo Remove this when #4683 fixed
+		$owner_has_changed = true;
+		$old_icontime = $fundcampaign->icontime;
+	}
 }
 
+	$must_move_icons = ($owner_has_changed && $old_icontime);
+
+	elgg_set_page_owner_guid($fundcampaign->guid);
+*/
+
+$forward_url = "404";
+if (elgg_is_active_plugin('moderation')) {	
+	$params = array ('plugin_name' => 'fundcampaigns', 'entity'=> $fundcampaign, 'is_new'=> $is_new_fundcampaign, 'input' => $input); 
+	$forward_url = elgg_trigger_plugin_hook('moderation:save', 'entity', $params);
+}	
+
 elgg_clear_sticky_form('fundcampaigns');
-forward($forward_url);	
+forward($forward_url);
 
 
 //TODO, restore trigger original entity save method.
+
+
+
+
+
+
 
 

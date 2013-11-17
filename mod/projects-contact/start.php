@@ -40,17 +40,12 @@ function projects_contact_page_handler($page) {
 
 	$pages = dirname(__FILE__) . '/pages/';
 
-	elgg_push_breadcrumb(elgg_echo('projects'), "projects/all");
+	elgg_push_breadcrumb(elgg_echo('projects'), "projects/all");	
 
 	switch ($page[0]) {
-
 		case "owner":
 			$project = projects_get_from_alias($page[1]);
-
-			if (!$project) {
-				forward();
-			}
-
+			if (!$project || !$project->isMember()) {forward('404');}	
 			elgg_set_page_owner_guid($project->guid);
 			elgg_push_breadcrumb($project->name, $project->getUrl());
 
@@ -60,7 +55,7 @@ function projects_contact_page_handler($page) {
 		case "view":
 			$contact = get_entity((int)$page[1]);
 			$project = get_entity($contact->toGuid);
-
+			if (!$project || !$project->isMember()) {forward('404');}
 			set_input('guid', $page[1]);
 
 			elgg_push_breadcrumb($project->name, $project->getURL());
@@ -69,9 +64,9 @@ function projects_contact_page_handler($page) {
 			break;
 
 		case "add":
-			$project_guid = projects_get_from_alias($page[1])->guid;
+			$$project_guid = projects_get_from_alias($page[1])->guid;
 			if (!$project_guid) {
-				forward();
+				forward('404');
 			}
 			elgg_set_page_owner_guid($project_guid);
 			include "$pages/add.php";
@@ -105,12 +100,12 @@ function projects_contact_count_unread($projectGuid) {
 
 function projects_contact_message_block_menu($hook, $type, $return, $params) {
 
-	if (!elgg_instanceof($params['entity'], 'group', 'project')) {
+	if (!elgg_instanceof($params['entity'], 'group')) {
 		return $return;
 	}
 
 	if ($params['entity']->isMember()) {
-		$url = "projects_contact/owner/{$params['entity']->alias}/}";
+		$url = "projects_contact/owner/{$params['entity']->alias}/";
 
 		$text = elgg_echo('projects_contact:projects');
 		$num_msg = projects_contact_count_unread($params['entity']->guid);

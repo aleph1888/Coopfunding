@@ -11,17 +11,14 @@
  */
 function fundcampaigns_get_from_alias($alias) {
 
-	$entities = elgg_get_entities_from_metadata(array(
-		'type' => 'object',
+	return current(elgg_get_entities_from_metadata(array(
+		'type' => 'group',
 		'subtype' => 'fundcampaign',
 		'metadata_name' => 'alias',
 		'metadata_value' => $alias,
 		'limit' => 1,
-	));
-	if ($entities) {
-		return $entities[0];
-	}
-	return false;
+	)));
+
 }
 
 /**

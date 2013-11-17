@@ -7,7 +7,6 @@
  */
 
 elgg_register_event_handler('init', 'system', 'projects_init');
-
 // Ensure this runs after other plugins
 elgg_register_event_handler('init', 'system', 'projects_fields_setup', 10000);
 
@@ -18,7 +17,7 @@ function projects_init() {
 
 	elgg_register_library('elgg:projects', elgg_get_plugins_path() . 'projects/lib/projects.php');
 
-	elgg_set_config('projects_icon_sizes', array(
+	elgg_set_config('group_icon_sizes', array(
 		'tiny' => array('w' => 50, 'h' => 50),
 		'small' => array('w' => 50, 'h' => 50),
 		'medium' => array('w' => 640, 'h' => 360),
@@ -344,17 +343,18 @@ function projects_url($entity) {
  * @return string Relative URL
  */
 function projects_icon_url_override($hook, $type, $returnvalue, $params) {
-	/* @var ElggGroup $project */
+	/* @var ElggGroup $project --> shared this function with fundcampaigns */
 	$project = $params['entity'];
+	$type = $params['entity']->getSubtype();
 	$size = $params['size'];
 
 	$icontime = $project->icontime;
 	if ($icontime) {
 		// return thumbnail
-		return "projecticon/$project->guid/$size/$icontime.jpg";
+		return "{$type}icon/$project->guid/$size/$icontime.jpg";
 	}
 
-	return "mod/projects/graphics/default{$size}.gif";
+	return "mod/{$type}s/graphics/default{$size}.gif";
 }
 
 /**

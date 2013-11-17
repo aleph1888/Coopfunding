@@ -63,6 +63,7 @@ function moderation_handle_main_page() {
 
 	$content = "<h3>" . elgg_echo('moderation:manage:new petitions') . "</h3><br>";
 	$list = elgg_list_entities_from_metadata(array(
+		'type' => 'group',
 		'metadata_name' => 'state',
 		'metadata_value' => 'request',
 		'full_view' => false
@@ -121,7 +122,7 @@ function moderation_do_save ($hook, $type, $returnvalue, $params) {
 	$entity_group = $entity_in;
 
 	if ($entity_in->getSubtype() == "revision") {
-		$entity_group = get_entity($entity_in->container_guid);
+		$entity_group = $$entity_in->getContainerEntity();
 		$return_url = $entity_container->getURL();
 		$action = "revision";
 	} else {
@@ -134,6 +135,7 @@ function moderation_do_save ($hook, $type, $returnvalue, $params) {
 		} elseif ($entity_in->state == "commited") {
 			elgg_load_library("elgg:moderation");
 			$revision = moderation_get_last_revision($entity_in);
+			//var_dump($revision->website);exit();
 			if (!$revision) {
 				$revision = new ElggObject();
 				$revision->type = 'object';
@@ -168,41 +170,43 @@ function moderation_do_save ($hook, $type, $returnvalue, $params) {
 	}
 
 	$map_to_group_object = elgg_is_admin_logged_in() && $action == "revision";
-	foreach($input as $shortname => $value) {
-		// update access collection name if name changes				
-		if (!$is_new_entity && $shortname == 'name' && $value != $entity_group->name) {
-			$entity_name = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
-			$string_to_sanatice = elgg_echo("{$entity_plugin_name}:{$entity_group->getSubtype()}");
-			$ac_name = sanitize_string($string_to_sanatice . ": " . $entity_name);
-			$acl = get_access_collection($entity_group->group_acl);
-			if ($acl) {
-				// @todo Elgg api does not support updating access collection name
-				$db_prefix = elgg_get_config('dbprefix');
-				$query = "UPDATE {$db_prefix}access_collections SET name = '$ac_name'
-					WHERE id = $entity_group->group_acl";
-				update_data($query);
-			}
+
+	// update access collection name if name changes				
+	if (!$is_new_entity && $input['name'] != $entity_update->name) {
+		$entity_name = html_entity_decode($input['name'], ENT_QUOTES, 'UTF-8');
+		$string_to_sanatice = elgg_echo("{$entity_plugin_name}:{$entity_group->getSubtype()}");
+		$ac_name = sanitize_string($string_to_sanatice . ": " . $entity_name);
+		$acl = get_access_collection($entity_group->group_acl);
+		if ($acl) {
+			// @todo Elgg api does not support updating access collection name
+			$db_prefix = elgg_get_config('dbprefix');
+			$query = "UPDATE {$db_prefix}access_collections SET name = '$ac_name'
+				WHERE id = $entity_group->group_acl";
+			update_data($query);
 		}
-		if ($entity_update->$shortname != $value) {
+	}
+	
+	foreach($input as $shortname => $value) {
+		//var_dump($shortname . "/" . $value . "////" . $entity_update->$shortname);
+		if ($entity_group->$shortname != $value) {
 			$entity_update->$shortname = $value;
-			if ($map_to_group_object) {
+			if ($map_to_group_object) {				
 				$entity_group->$shortname = $value;
 			}
 		}
-	}
+	}	
 	// Validate create
-	if (!$entity_update->name) {
+	if (!$entity_group->name) {
 		register_error(elgg_echo("{$entity_plugin_name}:notitle"));
 		forward(REFERER);
 	}
-		
-	#control user who do save.
+
 	if (elgg_is_admin_logged_in()) {
 		$entity_update->state = 'commited';
 		$info_message = elgg_echo('moderation:saved:commited');
 		$action = "commit";
-		if ($map_to_group_object) {
-			$entity_group->save();
+		if ($map_to_group_object) {			
+			$entity_group->save();			
 		}
 	} else {
 		$entity_update->state = 'in_progress';
@@ -210,7 +214,6 @@ function moderation_do_save ($hook, $type, $returnvalue, $params) {
 	}	
 	
 	$entity_update->save();
-
 	
 	$params = array (
 		'entity' => $entity_group,

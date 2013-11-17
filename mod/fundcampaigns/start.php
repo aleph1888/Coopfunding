@@ -15,24 +15,20 @@ function fundcampaigns_init() {
 
 	elgg_register_entity_type('fundcampaign');
 
-	elgg_set_config('fundcampaigns_icon_sizes', array(
-		'tiny' => array('w' => 50, 'h' => 50),
-		'small' => array('w' => 50, 'h' => 50),
-		'medium' => array('w' => 640, 'h' => 360),
-		'large' => array('w' => 720, 'h' => 405),
-	));
-
 	$root = dirname(__FILE__);
 	elgg_register_library('elgg:fundcampaigns', "$root/lib/fundcampaigns.php");
 
 	elgg_extend_view('css/elgg', 'fundcampaigns/css');
 
 	elgg_register_page_handler('fundcampaigns', 'fundcampaigns_page_handler');
+	elgg_register_page_handler('fundcampaign', 'fundcampaigns_page_handler');
 
+	// Register URL handlers for projects
+	elgg_register_entity_url_handler('group', 'fundcampaign', 'fundcampaigns_url');	
+
+	// Register an icon handler for projects
 	elgg_register_page_handler('fundcampaignicon', 'fundcampaigns_icon_handler');
-	elgg_register_entity_url_handler('object', 'fundcampaign', 'fundcampaigns_url');
 
-	elgg_register_plugin_hook_handler('entity:icon:url', 'object', 'fundcampaigns_icon_url_override');
 	elgg_register_plugin_hook_handler('register', 'menu:owner_block', 'fundcampaigns_block_menu');
 
 	$action_path = elgg_get_plugins_path() . 'fundcampaigns/actions';
@@ -136,7 +132,7 @@ function fundcampaigns_page_handler($page, $handler) {
 
 }
 
-function fundcampaigns_url($entity) {
+function fundcampaigns_url($entity) {	
 	return "fundcampaigns/view/{$entity->guid}";
 
 }
@@ -154,7 +150,7 @@ function fundcampaigns_handle_owner_page($project_guid) {
 	));
 
 	$content = elgg_list_entities(array(
-		'type' => 'object',
+		'type' => 'group',
 		'subtype' => 'fundcampaign',
 		'container_guid' => $project_guid,
 		'full_view' => false,
@@ -237,12 +233,12 @@ function fundcampaigns_handle_edit_page($page, $guid = 0) {
 	}
 
 	if (elgg_is_admin_logged_in() && elgg_is_active_plugin("moderation")) {
-		$sidebar = elgg_view('moderation/sidebar');
+		$sidebar = elgg_view('moderation/sidebar', array('entity' => $project));
 	}
-
 	$params = array(
 		'content' => $content,
 		'title' => $title,
+		'sidebar' => $sidebar,
 		'filter' => '',
 	);
 	$body = elgg_view_layout('content', $params);
@@ -252,7 +248,6 @@ function fundcampaigns_handle_edit_page($page, $guid = 0) {
 }
 
 function fundcampaigns_block_menu($hook, $type, $return, $params) {
-
 	$url = "fundcampaigns/owner/{$params['entity']->guid}";
 	$text = elgg_echo('fundcampaigns:campaigns');
 	$return[] = new ElggMenuItem('fundcampaigns', $text, $url);
@@ -262,7 +257,6 @@ function fundcampaigns_block_menu($hook, $type, $return, $params) {
 }
 
 function fundcampaigns_register_toggle() {
-
 	set_input('list_type', get_input('list_type', 'gallery'));
 
 	$url = elgg_http_remove_url_query_element(current_page_url(), 'list_type');
