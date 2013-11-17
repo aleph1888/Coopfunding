@@ -46,7 +46,7 @@ function fundcampaigns_fields_setup() {
 		
 		'paymethodBAN' => 'text',
 		'paymethodCES' => 'text',
-
+		'is_active' => 'text',
 		'start_date' => 'date',
 		'num_periods' => 'text', 
 		'periods_duration' => 'text',
