@@ -14,6 +14,9 @@ function fundraising_contribute_paypal($entity_guid, $amount, $reward_guid) {
 	$return_url = elgg_add_action_tokens_to_url(elgg_get_site_url() . 'action/fundraising/paypal-callback');
 
 	if (!$entity || !$amount) {
+		if (!$amount) {
+			register_error(elgg_echo('fundraising:error:noamount'));
+		}
 		forward(REFERER);
 	}
 

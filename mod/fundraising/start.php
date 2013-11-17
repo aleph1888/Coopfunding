@@ -20,15 +20,14 @@ function fundraising_init() {
 	elgg_register_page_handler('fundraising', 'fundraising_page_handler');
 
 	elgg_register_plugin_hook_handler('fundcampaigns:sidebarmenus', 'fundcampaign', 'fundraising_set_side_bar_menu');
-	elgg_register_action('fundraising/contribute', dirname(__FILE__) . '/actions/contribute.php');
+	elgg_register_action('fundraising/contribute', dirname(__FILE__) . '/actions/contribute.php', "public");
 
 	elgg_extend_view('js/elgg', 'fundraising/js');
-	elgg_extend_view('css/elgg', 'fundraising/css');
+	elgg_extend_view('css/elgg', 'fundraising/css');	
 	
 }
 
 function fundraising_page_handler($page, $handler) {
-
 	elgg_load_library('coopfunding:fundraising');
 	switch ($page[0]) {
 		case 'contribute':
@@ -42,7 +41,7 @@ function fundraising_page_handler($page, $handler) {
         	case 'view':
             		fundraising_view_transactions($page[1]);
             		break;
-		default:			
+		default:						
 			if (function_exists("fundraising_{$page[0]}_page_handler")) {
 				$return = call_user_func("fundraising_{$page[0]}_page_handler", $page, $handler);
 				break;

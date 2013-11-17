@@ -8,6 +8,12 @@ echo elgg_view('input/hidden', array(
 	                'value' => $vars['entity']->guid
 			));
 
+echo elgg_view('input/hidden', array(
+			'name' => "callback_url",
+			'id' => "callback_url",
+	                'value' => elgg_get_site_url() . 'fundraising/bitcoin/bitcoin-address'
+			));
+
 //show btc address and qr image
 echo "<div class='fundraising-bitcoin-contribute-form fundraising-hidden'>";
 echo "<hr>";

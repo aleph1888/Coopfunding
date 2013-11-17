@@ -35,3 +35,10 @@ function fundraising_sum_amount(ElggEntity $entity) {
 	return elgg_trigger_plugin_hook('fundraising', 'sum_amount', array('entity' => $entity), 0);
 }
 
+function fundraising_get_anonymous_usr() {		
+	$user = get_user_by_username("Someone");	
+	if (!$user) {
+		register_error(elgg_echo('fundraising:error:anonymouscontributionsnoneallowed'));
+	}
+	return $user;
+}

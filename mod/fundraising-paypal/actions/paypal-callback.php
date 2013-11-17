@@ -34,22 +34,28 @@ if ($token && isset($_SESSION['paypal_contrib'][$token])) { // Token parameter e
 	elgg_load_library('coopfunding:fundraising');
 	$contributions_set = fundraising_get_contributions_set($guid);
 
+	$user = elgg_get_logged_in_user_guid();
+	if (!$user) {
+		elgg_load_library("coopfunding:fundraising");
+		$user = fundraising_get_anonymous_usr();
+	}
+
 	if (!$contributions_set) {
 		$contributions_set = new ElggObject();
 		$contributions_set->subtype = "contributions_set";
-		$contributions_set->owner_guid = elgg_get_logged_in_user_guid();
+		$contributions_set->owner_guid = $user->guid;
 		$contributions_set->container_guid = $guid;
 	}
 
 	if ($contributions_set_guid = $contributions_set->save()) {
 		$transaction = new ElggObject();
 		$transaction->subtype = "transaction";
-		$transaction->owner_guid = elgg_get_logged_in_user_guid();
+		$transaction->owner_guid = $user->guid;
 		$transaction->container_guid = $guid;
 		$transaction->eur_amount = $amount;
 		$transaction->method = 'paypal';
 		$transaction->paypal_transaction_id = $transactionId;
-		$transaction->contributor = elgg_get_logged_in_user_guid();
+		$transaction->contributor = $user->guid;
 		$transaction->save();
 	}
 

@@ -14,6 +14,11 @@ function fundraising_bitcoin_get_address($entity_guid, $user_guid = null) {
 
 	if (!$user_guid) {
 		$user_guid = elgg_get_logged_in_user_guid();
+		if (!$user_guid) {
+			elgg_load_library("coopfunding:fundraising");
+			$user = fundraising_get_anonymous_usr();			
+			$user_guid = $user->guid;
+		}
 	}
 
 	if (!$user_guid || !$entity_guid) {
