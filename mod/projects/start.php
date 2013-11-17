@@ -70,10 +70,7 @@ function projects_init() {
 	}
 	if (elgg_is_active_plugin("fundraising")) {
 		elgg_extend_view('projects/contribute', 'fundraising/contribute_module');
-	}
-	
-	// add link to owner block
-	elgg_register_plugin_hook_handler('register', 'menu:owner_block', 'projects_activity_owner_block_menu');
+	}	
 
 	// project entity menu
 	elgg_register_plugin_hook_handler('register', 'menu:entity', 'projects_entity_menu_setup');
