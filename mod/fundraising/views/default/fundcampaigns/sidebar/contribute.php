@@ -11,6 +11,7 @@
 elgg_load_library('coopfunding:fundraising');
 
 $guid = $vars['entity']->guid;
+$entity = $vars['entity'];
 
 $contributors_count = elgg_get_entities(array(
 	'type' => 'object',
@@ -19,7 +20,7 @@ $contributors_count = elgg_get_entities(array(
 	'count' => true,
 ));
 
-$contributions_amount = fundraising_sum_amount($vars['entity']);
+$contributions_amount = fundraising_sum_amount($entity);
 
 if (!$contributors_count) {
 	$contributors_count = "0";
@@ -27,7 +28,7 @@ if (!$contributors_count) {
 
 $body = elgg_view('output/url', array(
 	'text' => elgg_echo('fundraising:contribute:button'),
-	'href' => "fundraising/contribute/{$vars['entity']->guid}",
+	'href' => "fundraising/contribute/{$entity->guid}",
 	'class' => 'elgg-button elgg-button-action',
 ));
 
@@ -39,13 +40,30 @@ $body .= "<br>" . elgg_view('output/url', array(
 
 $amount = elgg_echo('fundraising:contributions:amount', array($contributions_amount));
 $amount .= elgg_echo('fundraising:contributions:of');
-$amount .= elgg_echo('fundraising:contributions:eur', array($vars['entity']->total_amount));
-if ($vars['entity']->total_amount) {
-	$amount .= "\n" . elgg_echo($contributions_amount / $vars['entity']->total_amount * 100) . '%';
+$amount .= elgg_echo('fundraising:contributions:eur', array($entity->total_amount));
+if ($entity->total_amount) {
+	$amount .= "\n" . round($contributions_amount / $entity->total_amount * 100, 2) . '%';
 }
 
-$body .= "<br>" . elgg_view('output/text', array(
+$body .= "<br><br>" . elgg_view('output/text', array(
 	'value' => $amount,
 ));
+
+
+$body .= "<br><br>" . elgg_view('output/text', array('value' => "From: " . $entity->start_date));
+$period_one_date = date('Y-m-d', strtotime($entity->start_date . " + {$entity->period_one_duration} days"));
+if ($entity->period_one_duration) {
+	$time = "Period 1: " . $period_one_date;
+	$body .= "<br>" . elgg_view('output/text', array('value' => $time));	
+	if (time() < strtotime($period_one_date)) {
+		$amount = elgg_echo('fundraising:contributions:amount', array($contributions_amount));
+		$amount .= elgg_echo('fundraising:contributions:of');
+		$amount .= elgg_echo('fundraising:contributions:eur', array($entity->period_one_amount));
+		$amount .= "\n" . round($contributions_amount / $entity->period_one_amount * 100, 2) . '%';
+		$body .= "<br>" . elgg_view('output/text', array('value' => $amount));	
+	}
+}
+$body .= "<br>" . elgg_view('output/text', array('value' => "To: " . $entity->end_date));
+
 
 echo elgg_view_module('aside', elgg_echo('fundraising:contribute'), $body);

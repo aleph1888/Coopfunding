@@ -21,14 +21,14 @@ $language = array(
 	'fundcampaigns:notitle'=> "No title for campaign",
 	
 	'fundcampaigns:start_date' => 'Start date',
-    'fundcampaigns:activate_second_period' => 'Two periods?',
-    'fundcampaigns:total_amount' => 'Optimal amount (€)',
-    'fundcampaigns:periods_duration' => 'Days of each period',
-    'fundcampaigns:minimum_amount' => 'Minimum amount (€)',
+	'fundcampaigns:end_date' => 'End date',
+    	'fundcampaigns:total_amount' => 'Optimal amount (€)',
+    	'fundcampaigns:period_one_duration' => 'Days of first period (if any).',
+    	'fundcampaigns:period_one_amount' => 'Minimum amount (€) in first period',
     
-    'fundcampaigns:is_active' => 'Is this the only one active campaign of this project?',
-    'fundcampaigns:active' => 'Active',
-    'fundcampaigns:inactive' => 'Inactive',
+    	'fundcampaigns:is_active' => 'Is this the only one active campaign of this project?',
+    	'fundcampaigns:active' => 'Active',
+    	'fundcampaigns:inactive' => 'Inactive',
     
 	'fundcampaign:deleted' => 'Campaign deleted',
 	'fundcampaign:notdeleted' => 'Campaign not deleted',

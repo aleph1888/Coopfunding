@@ -37,22 +37,36 @@ if (!$fundcampaign) {
 
 	$body = elgg_view('output/url', array(
 		'text' => elgg_echo('fundraising:contribute:button'),
-		'href' => "fundraising/contribute/{$fundcampaign->guid}",
+		'href' => "fundraising/contribute/{$entity->guid}",
 		'class' => 'elgg-button elgg-button-action',
-	));
+	));	
 
 	$amount = elgg_echo('fundraising:contributions:amount', array($contributions_amount));
 	$amount .= elgg_echo('fundraising:contributions:of');
 	$amount .= elgg_echo('fundraising:contributions:eur', array($fundcampaign->total_amount));
-
-	if ($vars['entity']->total_amount) {
-		$amount .= "\n" . elgg_echo($contributions_amount / $fundcampaign->total_amount * 100) . '%';
+	if ($fundcampaign->total_amount) {
+		$amount .= "\n" . round($contributions_amount / $fundcampaign->total_amount * 100, 2) . '%';
 	}
 
-	$body .= "<br>" . elgg_view('output/text', array(
+	$body .= "<br><br>" . elgg_view('output/text', array(
 		'value' => $amount,
 	));
 
+
+	$body .= "<br><br>" . elgg_view('output/text', array('value' => "From: " . $fundcampaign->start_date));
+	$period_one_date = date('Y-m-d', strtotime($fundcampaign->start_date . " + {$fundcampaign->period_one_duration} days"));
+	if ($fundcampaign->period_one_duration) {
+		$time = "Period 1: " . $period_one_date;
+		$body .= "<br>" . elgg_view('output/text', array('value' => $time));	
+		if (time() < strtotime($period_one_date)) {
+			$amount = elgg_echo('fundraising:contributions:amount', array($contributions_amount));
+			$amount .= elgg_echo('fundraising:contributions:of');
+			$amount .= elgg_echo('fundraising:contributions:eur', array($fundcampaign->period_one_amount));
+			$amount .= "\n" . round($contributions_amount / $fundcampaign->period_one_amount * 100, 2) . '%';
+			$body .= "<br>" . elgg_view('output/text', array('value' => $amount));	
+		}
+	}
+	$body .= "<br>" . elgg_view('output/text', array('value' => "To: " . $fundcampaign->end_date));
 }
 
 echo elgg_view('projects/profile/module', array(

@@ -24,6 +24,7 @@ $input = array();
 $input['name'] = htmlspecialchars(get_input('name', '', false), ENT_QUOTES, 'UTF-8');
 $input['alias'] = htmlspecialchars(get_input('alias', '', false), ENT_QUOTES, 'UTF-8');
 $input['access_id'] = get_input('vis');
+$input['is_active'] = get_input('is_active');
 
 if ($fundcampaign_guid) {
 	$fundcampaign = new ElggGroup($fundcampaign_guid);

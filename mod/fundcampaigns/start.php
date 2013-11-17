@@ -46,12 +46,14 @@ function fundcampaigns_fields_setup() {
 		
 		'paymethodBAN' => 'text',
 		'paymethodCES' => 'text',
-		'is_active' => 'text',
+		
 		'start_date' => 'date',
-		'num_periods' => 'text', 
-		'periods_duration' => 'text',
-		'minimum_amount' => 'text', //%of total amount, will be used together with num_periods and periods_duration to desactive fundcampaig if amount not achived
-		'total_amount' => 'text', //%of total_amount, just metadata.
+		'end_date' => 'date',
+		'total_amount' => 'text',
+
+		'period_one_duration' => 'text',
+		'period_one_amount' => 'text',
+
 	);
 
 	$profile_defaults = elgg_trigger_plugin_hook('profile:fields', 'fundcampaigns', NULL, $profile_defaults);
