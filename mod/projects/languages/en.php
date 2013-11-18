@@ -31,16 +31,16 @@ $language = array(
 	'projects:members' => 'Project members',
 	'projects:subscribed' => 'Project notifications on',
 	'projects:unsubscribed' => 'Project notifications off',
-	
+
 	'projects:startdate' => 'Start date',
 	'projects:mail' => 'Mail',
 	'projects:geolocation' => 'Geolocation',
-	
+
 	'projects:paymethodBAN' => 'Bank account number',
 	'projects:paymethodCES' => 'Integral CES code',
 
 	'projects:when_closed' => 'Liquidation date',
-	'projects:who_closed' => 'Who did the liquidation'
+	'projects:who_closed' => 'Who did the liquidation',
 	'projects:info_closed' => 'Info about liquidation process',
 
 	'projects:members:title' => 'Members of %s',

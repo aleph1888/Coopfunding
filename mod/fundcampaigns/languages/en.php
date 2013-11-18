@@ -19,17 +19,17 @@ $language = array(
 	'fundcampaigns:delete' => "Delete campaign",
 	'fundcampaigns:deletewarning' => "Are you sure you want to delete this campaign?",
 	'fundcampaigns:notitle'=> "No title for campaign",
-	
+
 	'fundcampaigns:start_date' => 'Start date',
 	'fundcampaigns:end_date' => 'End date',
     	'fundcampaigns:total_amount' => 'Optimal amount (€)',
     	'fundcampaigns:period_one_duration' => 'Days of first period (if any).',
     	'fundcampaigns:period_one_amount' => 'Minimum amount (€) in first period',
-    
+
     	'fundcampaigns:is_active' => 'Is this the only one active campaign of this project?',
     	'fundcampaigns:active' => 'Active',
     	'fundcampaigns:inactive' => 'Inactive',
-    
+
 	'fundcampaign:deleted' => 'Campaign deleted',
 	'fundcampaign:notdeleted' => 'Campaign not deleted',
 	'fundcampaigns:icon' => 'Campaign icon (leave blank to leave unchanged)',
@@ -38,14 +38,12 @@ $language = array(
 	'fundcampaigns:description' => 'Description',
 	'fundcampaigns:briefdescription' => 'Brief description',
 	'fundcampaigns:interests' => 'Tags',
-	
 	'fundcampaigns:paymethodBAN' => 'Bank Account Number',
 	'fundcampaigns:paymethodCES' => 'Integral CES code',
 
 	'fundcampaigns:when_closed' => 'Liquidation date',
-	'fundcampaigns:who_closed' => 'Who did the liquidation'
+	'fundcampaigns:who_closed' => 'Who did the liquidation',
 	'fundcampaigns:info_closed' => 'Info about liquidation process',
-
 
 	'fundcampaigns:members' => 'Campaigns members',
 	'fundcampaings:cantedit' => 'You can not edit this campaign',
