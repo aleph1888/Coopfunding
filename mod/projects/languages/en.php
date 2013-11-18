@@ -39,6 +39,10 @@ $language = array(
 	'projects:paymethodBAN' => 'Bank account number',
 	'projects:paymethodCES' => 'Integral CES code',
 
+	'projects:when_closed' => 'Liquidation date',
+	'projects:who_closed' => 'Who did the liquidation'
+	'projects:info_closed' => 'Info about liquidation process',
+
 	'projects:members:title' => 'Members of %s',
 	'projects:members:more' => "View all members",
 	'projects:membership' => "Project membership permissions",

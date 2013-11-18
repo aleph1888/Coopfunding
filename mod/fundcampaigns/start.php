@@ -52,6 +52,10 @@ function fundcampaigns_fields_setup() {
 
 		'period_one_duration' => 'text',
 		'period_one_amount' => 'text',
+
+		'when_closed' => 'date',
+		'who_closed' => 'text',
+		'info_closed'  => 'text',
 	);
 
 	$profile_defaults = elgg_trigger_plugin_hook('profile:fields', 'fundcampaigns', NULL, $profile_defaults);

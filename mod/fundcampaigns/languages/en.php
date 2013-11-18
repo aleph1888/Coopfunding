@@ -42,6 +42,11 @@ $language = array(
 	'fundcampaigns:paymethodBAN' => 'Bank Account Number',
 	'fundcampaigns:paymethodCES' => 'Integral CES code',
 
+	'fundcampaigns:when_closed' => 'Liquidation date',
+	'fundcampaigns:who_closed' => 'Who did the liquidation'
+	'fundcampaigns:info_closed' => 'Info about liquidation process',
+
+
 	'fundcampaigns:members' => 'Campaigns members',
 	'fundcampaings:cantedit' => 'You can not edit this campaign',
 	'fundcampaigns:saved' => 'Campaign saved',

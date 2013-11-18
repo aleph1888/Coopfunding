@@ -134,8 +134,10 @@ function projects_fields_setup() {
 		'website' => 'text',
 		'geolocation' => 'text',
 		'paymethodBAN' => 'text',
-		'paymethodCES' => 'text'
-
+		'paymethodCES' => 'text',
+		'when_closed' => 'date',
+		'who_closed' => 'text',
+		'info_closed'  => 'text',
 	);
 
 	$profile_defaults = elgg_trigger_plugin_hook('profile:fields', 'project', NULL, $profile_defaults);
