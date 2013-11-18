@@ -18,5 +18,10 @@
 		<type>plugin</type>
 		<plugin>fundraising</plugin>
 	</requires>
+	<requires>
+		<type>priority</type>
+		<priority>after</priority>
+		<plugin>campaign_reward</plugin>
+	</requires>
 	<activate_on_install>true</activate_on_install>
 </plugin_manifest>
