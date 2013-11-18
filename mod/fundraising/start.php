@@ -19,6 +19,7 @@ function fundraising_init() {
 	elgg_register_page_handler('fundraising', 'fundraising_page_handler');
 
 	elgg_register_plugin_hook_handler('fundcampaigns:sidebarmenus', 'fundcampaign', 'fundraising_set_side_bar_menu');
+	elgg_register_plugin_hook_handler('projects:sidebarmenus', 'project', 'fundraising_set_side_bar_menu');
 	elgg_register_action('fundraising/contribute', dirname(__FILE__) . '/actions/contribute.php', "public");
 
 	elgg_extend_view('js/elgg', 'fundraising/js');
@@ -27,6 +28,11 @@ function fundraising_init() {
 }
 
 function fundraising_page_handler($page, $handler) {
+
+	if (!isset($page[0]) || !isset($page[1])) {
+		forward('', '404');
+	}
+
 	elgg_load_library('coopfunding:fundraising');
 	switch ($page[0]) {
 		case 'contribute':
@@ -35,7 +41,7 @@ function fundraising_page_handler($page, $handler) {
 			break;
 		case 'contributors':
 			set_input('guid', $page[1]);
-		include(elgg_get_plugins_path() . 'fundraising/pages/contributors.php');
+			include(elgg_get_plugins_path() . 'fundraising/pages/contributors.php');
 			break;
 		case 'view':
 			fundraising_view_transactions($page[1]);
@@ -88,8 +94,17 @@ function fundraising_set_side_bar_menu ($hook, $entity_type, $return_value, $par
 }
 
 function fundraising_view_transactions ($guid) {
-	$params = array();
-	$params['filter_context'] = 'mine';
+	$entity = get_entity($guid);
+
+	elgg_push_breadcrumb(elgg_echo("projects"), 'projects/all');
+	if ($entity->getSubtype() == 'fundcampaign') {
+		elgg_push_breadcrumb($entity->getContainerEntity()->name, "project/{$entity->getContainerEntity()->alias}");
+		elgg_push_breadcrumb(elgg_echo("fundcampaigns"), "fundcampaigns/owner/{$entity->getContainerEntity()->guid}");
+		elgg_push_breadcrumb($entity->name, "fundcampaigns/{$entity->alias}");
+	} else {
+		elgg_push_breadcrumb($entity->name, "project/{$entity->alias}");
+	}
+	elgg_push_breadcrumb(elgg_echo("fundraising"));	
 
 	$options = array(
 		'type' => 'object',
@@ -98,26 +113,17 @@ function fundraising_view_transactions ($guid) {
 		'full_view' => false,
 		'no_results' => elgg_echo('fundraising:notransactions'),
 	);
+	
+	$content = elgg_list_entities_from_metadata($options);	
+	$params = array();
+	$params['filter'] = false;
+	$params['content'] = $content;
 
-	if ($guid) {
-		$options['container_guid'] = $guid;
-		$container = get_entity($guid);
-		$params['title'] = elgg_echo('fundraising:contributions', array($container->alias));
+	$body = elgg_view_layout('content', $params);
 
-		$params['filter'] = false;
-		$content = elgg_list_entities_from_metadata($options);
+	echo elgg_view_page($params['title'], $body);
 
-		elgg_push_breadcrumb(elgg_echo("{$container->alias}"), $container->getURL());
 
-		$params['title'] = $title;
-		$params['content'] = $content;
-
-		$body = elgg_view_layout('content', $params);
-
-		echo elgg_view_page($params['title'], $body);
-		return true;
-	} else {
-		return false;
-	}
+	return true;
 
 }

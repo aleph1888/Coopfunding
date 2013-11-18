@@ -284,13 +284,9 @@ function projects_handle_profile_page($guid) {
 	projects_register_profile_buttons($project);
 
 	$content = elgg_view('projects/profile/layout', array('entity' => $project));
-	$sidebar = '';
-
 	$sidebar .= elgg_view('projects/sidebar/contribute', array('entity' => $project));
-	if (elgg_is_active_plugin('search')) {
-		$sidebar .= elgg_view('projects/sidebar/search', array('entity' => $project));
-	}
 	$sidebar .= elgg_view('projects/sidebar/members', array('entity' => $project));
+	$sidebar .= elgg_trigger_plugin_hook('projects:sidebarmenus', 'project', $project);
 
 	$params = array(
 		'content' => $content,
