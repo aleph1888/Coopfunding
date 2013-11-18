@@ -68,6 +68,9 @@ function projects_init() {
 	if (elgg_is_active_plugin("campaign_reward")) {
 		elgg_extend_view('projects/campaign_rewards', 'campaign_reward/rewards_module');
 	}
+	if (elgg_is_active_plugin("campaign_collective")) {
+		elgg_extend_view('projects/campaign_collective', 'campaign_collective/collective_module');
+	}
 	if (elgg_is_active_plugin("fundraising")) {
 		elgg_extend_view('projects/contribute', 'fundraising/contribute_module');
 	}	

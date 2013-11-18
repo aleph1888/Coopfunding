@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin_manifest xmlns="http://www.elgg.org/plugin_manifest/1.8">
+	<name>Collective Returns</name>
+	<author>Coopfunding developers</author>
+	<version>0.1</version>
+	<category>coopfunding-bundled</category>
+	<category>social</category>
+	<category>content</category>
+	<description>Campaign management for collective returns.</description>
+	<website>https://coopfunding.net/</website>
+	<copyright>See COPYRIGHT.txt</copyright>
+	<license>GNU Affero General Public License version 3 or higher</license>
+	<requires>
+		<type>elgg_release</type>
+		<version>1.8</version>
+	</requires>
+	<activate_on_install>true</activate_on_install>
+</plugin_manifest>
