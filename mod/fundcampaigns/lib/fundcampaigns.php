@@ -97,7 +97,7 @@ function fundcampaigns_is_active_campaign ($fundcampaign) {
 }
 
 function fundcampaigns_get_active_campaign ($guid = 0) {
-	return current(elgg_get_entities_from_metadata(array(
+	$fundcampaign =  current(elgg_get_entities_from_metadata(array(
 		'type' => 'group',
 		'subtype' => 'fundcampaign',
 		'container_guid' => $guid,
@@ -105,5 +105,10 @@ function fundcampaigns_get_active_campaign ($guid = 0) {
 		'metadata_value' => true,
 		'limit' => 1,
 	)));
+
+	if (fundcampaigns_is_active_campaign ($fundcampaign)) {
+		return $fundcampaign;
+	}
+	return null;
 
 }
