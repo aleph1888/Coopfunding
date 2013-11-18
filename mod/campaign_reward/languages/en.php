@@ -6,7 +6,7 @@
 
  $language = array(
 	
-	'campaign_reward:rewards' => 'Rewards',
+	'campaign_reward:rewards' => 'Individual rewards',
 
 	'campaign_reward:books:view all' => 'View all reward books',
 	'campaign_reward:reward_books' => 'Reward books',
@@ -17,7 +17,7 @@
 
 	'campaign_reward:reward_book:success' => 'The book has been commited in a new transaction.',
 
-	'campaign_reward:items' => 'Individual reward',
+	'campaign_reward:items' => 'Individual rewards',
 	'campaign_reward:view all' => 'View all rewards',
 	'campaign_reward:addreward' => 'Add new reward',
 	'campaign_reward' => 'Rewards',

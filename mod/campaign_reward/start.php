@@ -138,8 +138,8 @@ function campaign_reward_set_side_bar_menu ($hook, $entity_type, $return_value, 
 }
 
 function campaign_reward_set_add_button ($hook, $entity_type, $return_value, $params) {
-	campaign_reward_set_add_button_func($params->guid);
-
+	$return_value .= campaign_reward_set_add_button_func($params->guid);
+	return $return_value;
 }
 
 function campaign_reward_set_add_button_func ($guid) {
@@ -151,7 +151,7 @@ function campaign_reward_set_add_button_func ($guid) {
 		$text = elgg_echo("campaign_reward:addreward");
 		$url = elgg_get_site_url() . "campaign_reward/add/{$guid}";
 
-	    	elgg_register_menu_item('title', array(
+		elgg_register_menu_item('title', array(
 					'name' => $text,
 					'href' => $url,
 					'text' => elgg_echo($text),

@@ -5,16 +5,15 @@ $project = $vars['entity'];
 if (!$project) {
 	return true;
 }
+$fundcampaign = fundcampaigns_get_active_campaign ($project->guid);
 
 $all_link = elgg_view('output/url', array(
-	'href' => "campaign_reward/books/{$fundcampaign->guid}",
+	'href' => "campaign_reward/owner/{$fundcampaign->guid}",
 	'text' =>  elgg_echo('campaign_reward:view all'),
 	'is_trusted' => true,
 ));
 
 elgg_load_library('elgg:fundcampaigns');
-
-$fundcampaign = fundcampaigns_get_active_campaign ($project->guid);
 
 if (!$fundcampaign) {
 	$content = '<p>' . elgg_echo('rewards:none') . '</p>';
