@@ -5,47 +5,27 @@
  * @return array
  */
 function campaign_reward_get_page_content_list($guid = NULL) {
+	elgg_load_library('coopfunding:fundcampaigns');
 
-	$return = array();
-
-	$return['filter_context'] = 'mine';
-
+	$fundcampaign = get_entity($guid);
 	$options = array(
 		'type' => 'object',
 		'subtype' => 'campaign_reward',
-		'full_view' => false,
+		'container_guid' => $guid,
+		'donatebutton' => fundcampaigns_is_active_campaign($fundcampaign),
+		'full_view' => true,
 		'no_results' => elgg_echo('campaign_reward:none'),
 		'order_by_metadata' => array('name' => 'amount', 'direction' => 'ASC', 'as' => 'integer')
-	);
+	);	
 
-	if ($guid) {
-		$options['container_guid'] = $guid;
-		$container = get_entity($guid);
-		elgg_load_library('coopfunding:fundcampaigns');
-		$options['donatebutton'] = fundcampaigns_is_active_campaign($container);
-
-		$return['title'] = elgg_echo('campaign_reward:title:campaigns_individual_rewards', array($container->name));
-
-		$crumbs_title = $container->alias;
-		elgg_push_breadcrumb(elgg_echo("fundcampaigns"), "fundcampaigns/all");
-		elgg_push_breadcrumb($container->alias, "fundcampaigns/{$container->alias}");
-
-        	$return['filter'] = false;
-
-	} else {
-		return false;
-	}
-
- 	$content = elgg_list_entities_from_metadata($options);
-
-	$return['title'] = $title;
-	$return['content'] = $content;
-
+	$return = array();
+	$return['title'] = elgg_echo('campaign_reward:title', array($fundcampaign->name));
+	$return['filter_context'] = 'mine';	
+	$return['filter'] = false;
+ 	$return['content'] = elgg_list_entities_from_metadata($options);
 	return $return;
 
 }
-
-
 
 /**
  * Get page components to edit/create a campaign_reward post.
@@ -55,7 +35,6 @@ function campaign_reward_get_page_content_list($guid = NULL) {
  * @return array
  */
 function campaign_reward_get_page_content_edit($page, $guid = NULL) {
-
 	$return = array(
 		'filter' => '',
 	);
@@ -72,25 +51,14 @@ function campaign_reward_get_page_content_edit($page, $guid = NULL) {
 
 		if (elgg_instanceof($campaign_reward, 'object', 'campaign_reward') && $campaign_reward->canEdit()) {
 			$vars['entity'] = $campaign_reward;
-
 			$title .= ": " . $campaign_reward->title;
-
 			$body_vars = campaign_reward_prepare_form_vars($campaign_reward, $guid);
-
-			$fundcampaign = get_entity($campaign_reward->container_guid);
-			elgg_push_breadcrumb($fundcampaign->alias, $fundcampaign->getURL());
-			elgg_push_breadcrumb(elgg_echo('campaign_reward:rewards', "campaign_reward/owner/{$fundcampaign->guid}"));
-			elgg_push_breadcrumb($campaign_reward->title);
-
 			$content = elgg_view_form('campaign_reward/save', $vars, $body_vars);
 		} else {
 			$content = elgg_echo('campaign_reward:error:cannot_edit_item');
 		}
-	} else {
-		elgg_push_breadcrumb(elgg_echo('campaign_reward:add'));
-
+	} else {		
 		$body_vars = campaign_reward_prepare_form_vars(null, $guid);
-
 		$title = elgg_echo('campaign_reward:add');
 		$content = elgg_view_form('campaign_reward/save', $vars, $body_vars);
 	}
@@ -99,13 +67,13 @@ function campaign_reward_get_page_content_edit($page, $guid = NULL) {
 	$return['content'] = $content;
 	$return['sidebar'] = $sidebar;
 	return $return;
+
 }
 
 function campaign_reward_get_page_content_books ($guid) {
+	$params = array();
 
-    	$params = array();
-
-    	$params['filter_context'] = 'mine';
+	$params['filter_context'] = 'mine';
 
 	$fundcampaign = get_entity($guid);
 	$options = array(
@@ -120,13 +88,11 @@ function campaign_reward_get_page_content_books ($guid) {
 	$title = elgg_echo('campaign_reward:reward_books');
 	$content = elgg_list_entities_from_metadata($options);
 
-	elgg_push_breadcrumb($fundcampaign->alias, $fundcampaign->getURL());
-	elgg_push_breadcrumb(elgg_echo("campaign_reward:books"));
-
-    	$params['title'] = $title;
-    	$params['content'] = $content;
+	$params['title'] = $title;
+	$params['content'] = $content;
 	$params['filter'] = "";
 	return $params;
+
 }
 
 /**
@@ -136,13 +102,12 @@ function campaign_reward_get_page_content_books ($guid) {
  * @return array
  */
 function campaign_reward_prepare_form_vars($campaign_reward = NULL, $container_guid = NULL) {
-
 	// input names => defaults
 	$values = array(
 		'title' => NULL,
 		'description' => NULL,
 		'stock' => '0',
-		'access_id' => ACCESS_DEFAULT,
+		'access_id' => ACCESS_PUBLIC,
 		'amount' => '0',
 		'container_guid' => $container_guid,
 		'guid' => NULL,
@@ -169,6 +134,7 @@ function campaign_reward_prepare_form_vars($campaign_reward = NULL, $container_g
 		return $values;
 	}
 	return $values;
+
 }
 
 
@@ -196,13 +162,13 @@ function campaign_reward_is_stocked ($reward_guid, $accept_zero_value = 'NO') {
 	} else {
 		return false;
 	}
+
 }
 
 /**
 * Search first relation kind 'reward' of $guid and returns the other $guid
 **/
 function campaign_reward_get_reward_or_transaction ($guid) {
-
 	$relations = get_entity_relationships ($guid);
 	foreach ($relations as $relation) {
 		if ($relation->relationship == "reward") {
@@ -214,13 +180,13 @@ function campaign_reward_get_reward_or_transaction ($guid) {
 		}
 	}
 	return 0;
+
 }
 
 /**
 * Search first book kind 'reward' of user and entity
 **/
 function campaign_reward_get_reward_book ($book_search_code) {
-
 	return current(elgg_get_entities_from_metadata (array (
 		'type' => 'object',
 		'subtype' => 'reward_book',
@@ -228,8 +194,8 @@ function campaign_reward_get_reward_book ($book_search_code) {
 		'metadatavalue' => $book_search_code,
 		'limit' =>1
 		)));
-}
 
+}
 
 /**
 * gets a output block {label:select} with all campaign_reward of $params['fundcampaign_guid'], and, if transaction is supported, then selects in the dropdown.
@@ -238,7 +204,6 @@ function campaign_reward_get_reward_book ($book_search_code) {
 * $params['transaction_guid']
 **/
 function campaign_reward_get_selector ($params){
-
 	//Get reward list of this campaign
 	$rewards = elgg_get_entities_from_metadata(array(
 		'type' => 'object',
@@ -277,6 +242,7 @@ function campaign_reward_get_selector ($params){
  	$output = "<div><label>" . elgg_echo('campaign_reward:reward') . "</label><br>" . $select . "</div>";
 
 	return  $output;
+
 }
 
 /**
@@ -286,7 +252,6 @@ function campaign_reward_get_selector ($params){
 *
 **/
 function campaign_reward_can_change_stock($reward_guid, $new_stock) {
-
 	$reward = get_entity ($reward_guid);
 
 	if ( $reward->stock == $new_stock) {
@@ -296,6 +261,7 @@ function campaign_reward_can_change_stock($reward_guid, $new_stock) {
 		$missing = $reward->stock - $left;
 		return array($new_stock >= $missing, $missing);
 	}
+
 }
 
 

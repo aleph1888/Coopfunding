@@ -42,7 +42,7 @@ foreach (fundraising_get_methods() as $method) {
 		$buttons .= elgg_view('input/button', array(
 			'name' => "fundraising_{$method}_contribute_button",
 			'id' => "fundraising_{$method}_contribute_button",
-	                'value' => elgg_echo('fundraising:contribute:button:method', array($method)),
+	                'value' => elgg_echo('fundraising:contribute:button:method', array($method)), #change this literal will disconfigure in fundraising/actions/contribute.php
 			'class' => "fundraising-{$method}-contribute-button"
 			));		
 		$forms .= elgg_view($url, $vars);	
@@ -50,7 +50,7 @@ foreach (fundraising_get_methods() as $method) {
 	} else {
 	        $buttons .= elgg_view('input/submit', array(
 			'name' => 'method',
-	                'value' => elgg_echo('fundraising:contribute:button:method', array($method)),
+	                'value' => elgg_echo('fundraising:contribute:button:method', array($method)), #change this literal will disconfigure in fundraising/actions/contribute.php
 		));
 	}
 }

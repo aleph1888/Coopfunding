@@ -12,12 +12,16 @@
 	'campaign_reward:reward_books' => 'Reward books',
 	'campaign_reward:books' => 'Reward books',
 
-	'campaign_reward:reward_book:success' => 'The book has been commited in a new transaction.',	
-	
+	'campaign_reward:reward_book:done' => 'The book has been submited. Please make your payment.',
+	'campaign_reward:reward_book:error' => 'Cannot book your reward. Maybe stock has run out.',
+
+	'campaign_reward:reward_book:success' => 'The book has been commited in a new transaction.',
+
 	'campaign_reward:items' => 'Individual reward',
 	'campaign_reward:view all' => 'View all rewards',
 	'campaign_reward:addreward' => 'Add new reward',
 	'campaign_reward' => 'Rewards',
+	'campaign_reward:title' => "%s 's Rewards",
 	'campaign_reward:amount' => 'Amount',
 	'campaign_reward:stock' => 'Stock',
 

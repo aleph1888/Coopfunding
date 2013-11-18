@@ -15,9 +15,13 @@ function fundraising_bitcoin_init() {
 	elgg_register_action('fundraising/bitcoin-address', dirname(__FILE__) . '/actions/bitcoin-address.php', "public");	
 	elgg_register_plugin_hook_handler('fundraising', 'sum_amount', 'fundraising_bitcoin_sum_amount');
 
-   	elgg_load_library('coopfunding:fundraising');
-   	fundraising_register_method('bitcoin');
-    	fundraising_register_currency('btc');
+	elgg_load_library('coopfunding:fundraising');
+	fundraising_register_method('bitcoin');
+	fundraising_register_currency('btc');
+
+	if (!elgg_get_config('bitcoin_book_days')) {
+		elgg_set_config('bitcoin_book_days', 1);
+	}
 
 	elgg_register_plugin_hook_handler('cron', 'hourly', 'fundraising_bitcoin_cron');
 }

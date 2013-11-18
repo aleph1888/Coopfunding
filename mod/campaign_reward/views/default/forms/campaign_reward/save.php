@@ -56,13 +56,6 @@ $stock_input = elgg_view('input/text', array(
 	'value' => _elgg_html_decode($vars['stock'])
 ));
 
-if ($vars['guid']) {
-	$entity = get_entity($vars['guid']);
-	$saved = date('F j, Y @ H:i', $entity->time_created);
-} else {
-	$saved = elgg_echo('never');
-}
-
 $access_label = elgg_echo('access');
 $access_input = elgg_view('input/access', array(
 	'name' => 'access_id',
@@ -76,7 +69,6 @@ $guid_input = elgg_view('input/hidden', array('name' => 'guid', 'value' => $vars
 
 
 echo <<<___HTML
-
 
 <div>
 	<label for="campaign_reward_title">$title_label</label>

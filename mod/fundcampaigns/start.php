@@ -13,7 +13,7 @@ elgg_register_event_handler('init', 'system', 'fundcampaigns_fields_setup', 1000
 
 function fundcampaigns_init() {
 
-	elgg_register_entity_type('fundcampaign');
+	elgg_register_entity_type('group', 'fundcampaign');
 
 	$root = dirname(__FILE__);
 	elgg_register_library('elgg:fundcampaigns', "$root/lib/fundcampaigns.php");
@@ -38,7 +38,6 @@ function fundcampaigns_init() {
 }
 
 function fundcampaigns_fields_setup() {
-
 	$profile_defaults = array(
 		'description' => 'longtext',
 		'briefdescription' => 'text',
@@ -53,7 +52,6 @@ function fundcampaigns_fields_setup() {
 
 		'period_one_duration' => 'text',
 		'period_one_amount' => 'text',
-
 	);
 
 	$profile_defaults = elgg_trigger_plugin_hook('profile:fields', 'fundcampaigns', NULL, $profile_defaults);
@@ -98,19 +96,21 @@ function fundcampaigns_page_handler($page, $handler) {
 			return false;
 		case 'owner':
 			elgg_set_page_owner_guid($page[1]);
-			set_input('project', $page[1]);			
+			set_input('project', $page[1]);	
 			$project = get_entity($page[1]);
 			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
 			fundcampaigns_register_toggle();
 			fundcampaigns_handle_owner_page($page[1]);
 			break;
+
 		case 'view':
 			if (!$fundcampaign) { $fundcampaign = get_entity($page[1]);}
 			$project = get_entity($fundcampaign->container_guid);
 			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
-			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));			
+			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
 			fundcampaigns_handle_view_page($fundcampaign->guid);
 			break;
+
 		case 'edit':
 			$fundcampaign = fundcampaigns_get_from_alias($page[1]);
 			$project = get_entity( $fundcampaign->container_guid);
@@ -118,15 +118,17 @@ function fundcampaigns_page_handler($page, $handler) {
 			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
 			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
 			set_input('fundcampaign', $fundcampaign->guid);
-			set_input('project', $fundcampaign->container_guid);			
-			fundcampaigns_handle_edit_page('edit',$fundcampaign->guid);			
+			set_input('project', $fundcampaign->container_guid);
+			fundcampaigns_handle_edit_page('edit',$fundcampaign->guid);
 			break;
+
 		case 'add':
 			$project = get_entity($page[1]);
 			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
 			set_input('project', $page[1]);
 			fundcampaigns_handle_edit_page('add', $page[1]);
 			break;
+
 		default:
 			return false;
 	}

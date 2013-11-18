@@ -15,7 +15,10 @@ $language = array(
 	'fundraising:bitcoin:contributeNoAddress' => "This entity is not configured to recieve bitcoins.",
 	'fundraising:bitcoin:or' => 'or',
 	'fundraising:contributions:btc' => '%.4f BTC',
-	'fundraising:bitcoin:message' => 'By confirming this operation a notification will be send to admins that will wait for 10 days you to make effective the transaction. And also your suitable reward will be reserved during this period of time.',
+	
+	'fundraising:bitcoin:message_anonymous_contribute' => 'Thanks for contribute. Login to get rewards for contribution.',
+	'fundraising:bitcoin:message_contribute' => 'Thanks for contribute. Choose a reward before contributing if you want any.',
+	'fundraising:bitcoin:message_contribute_rewards' => 'By clicking the button below, you can book the reward during %s day(s) while you do the transfer.',
 
 );
 add_translation(basename(__FILE__, '.php'), $language);

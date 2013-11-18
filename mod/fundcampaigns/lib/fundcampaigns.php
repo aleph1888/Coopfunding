@@ -10,7 +10,6 @@
  * Get project entity from its alias
  */
 function fundcampaigns_get_from_alias($alias) {
-
 	return current(elgg_get_entities_from_metadata(array(
 		'type' => 'group',
 		'subtype' => 'fundcampaign',
@@ -28,7 +27,6 @@ function fundcampaigns_get_from_alias($alias) {
  * @return array
  */
 function fundcampaigns_prepare_form_vars($fundcampaign = null) {
-
 	$values = array(
 		'name' => '',
 		'alias' => '',
@@ -92,14 +90,13 @@ function fundcampaigns_prepare_form_vars($fundcampaign = null) {
 
 }
 
-
 function fundcampaigns_is_active_campaign ($fundcampaign) {
 	$date = date('Y-m-d');
-	return $fundcampaign->is_active && $date > $fundcampaign->start_date;
+	return $fundcampaign->is_active && $date >= $fundcampaign->start_date && $date <= $fundcampaign->end_date;;
+
 }
 
 function fundcampaigns_get_active_campaign ($guid = 0) {
-
 	return current(elgg_get_entities_from_metadata(array(
 		'type' => 'group',
 		'subtype' => 'fundcampaign',

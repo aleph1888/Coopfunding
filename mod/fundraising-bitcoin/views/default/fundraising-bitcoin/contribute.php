@@ -1,5 +1,12 @@
 <?php
 
+$user = elgg_get_logged_in_user_entity();
+if (!$user) {
+	$is_anonymous = true;
+	elgg_load_library("coopfunding:fundraising");
+	$user = fundraising_get_anonymous_usr();
+}
+
 $address = $vars["address"]; 
 
 echo elgg_view('input/hidden', array(
@@ -26,16 +33,24 @@ echo "<hr>";
 	echo '<img id="bitcoin_qrcode">';
 	echo '</div>';
 
-	$user = elgg_get_logged_in_user_entity();
-	if ($user) {
+	if ($is_anonymous) {
 		echo '<div>';
-		echo elgg_echo("fundraising:bankaccount:message");
+			echo elgg_echo("fundraising:bitcoin:message_anonymous_contribute");
+		echo '</div>';
+		
+	} elseif (!$vars['reward_guid']){
+		echo '<div>';
+			echo elgg_echo("fundraising:bitcoin:message_contribute");
+		echo '</div>';	
+	} else {
+		echo '<div>';
+		echo elgg_echo("fundraising:bitcoin:message_contribute_rewards", array(elgg_get_config('bitcoin_book_days')));
 		echo '</div>';
 
 		echo elgg_view('input/submit', array(
 			'name' => 'method',
-		        'value' => elgg_echo('fundraising:contribute:button:method', array('bitcoin')),
-		));
+			'value' => elgg_echo('fundraising:contribute:button:book', array('bitcoin')), #change this literal will disconfigure in fundraising/actions/contribute.php
+		));	
 	}
 	echo "</div>";
 

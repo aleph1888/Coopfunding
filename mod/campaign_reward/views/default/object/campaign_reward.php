@@ -23,13 +23,12 @@ $metadata = elgg_view_menu('entity', array(
 ));
 
 if (elgg_is_active_plugin('fundraising')) {
-    elgg_load_library('coopfunding:fundraising');
-    $fundcampaign = get_entity ($campaign_reward->container_guid);
-   
-    if ($donatebutton) {
-        $metadata .= fundraising_get_contribute_button ($fundcampaign->guid, $campaign_reward->amount);
-    }
-   
+	elgg_load_library('coopfunding:fundraising');
+	$fundcampaign = get_entity ($campaign_reward->container_guid);
+	
+	if ($donatebutton) {
+		$metadata .= fundraising_get_contribute_button ($fundcampaign->guid, $campaign_reward->amount);
+	}	
 }
 
 $subtitle = "$campaign_reward->amount" . "€";
