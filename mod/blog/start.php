@@ -21,7 +21,6 @@ function blog_init() {
 
 	elgg_register_library('elgg:blog', elgg_get_plugins_path() . 'blog/lib/blog.php');
 
-
 	elgg_register_event_handler('upgrade', 'upgrade', 'blog_run_upgrades');
 
 	// add to the main css
@@ -38,7 +37,7 @@ function blog_init() {
 	// override the default url to view a blog object
 	elgg_register_plugin_hook_handler('entity:url', 'object', 'blog_set_url');
 
-    // add blog menu on project's campaign side bar
+	// add blog menu on project's campaign side bar
 	elgg_register_plugin_hook_handler('fundcampaigns:sidebarmenus', 'fundcampaign', 'blog_set_project_campaign_sidebar_menu');
 	
 	// notifications
@@ -97,14 +96,24 @@ function blog_init() {
  */
 function blog_page_handler($page) {
 
-	elgg_load_library('elgg:blog');
-
-	// push all blogs breadcrumb
-	elgg_push_breadcrumb(elgg_echo('blog:blogs'), "blog/all");
+	elgg_load_library('elgg:blog');	
 
 	if (!isset($page[0])) {
 		$page[0] = 'all';
 	}
+
+	$entity = get_entity($page[1]);
+	if (!$entity) {
+		forward ('', '404');
+	}
+
+	elgg_push_breadcrumb(elgg_echo("projects"), 'projects/all');	
+	if ($entity->getSubtype() == "project") {
+		elgg_push_breadcrumb($entity->name, "project/{$entity->getContainerEntity()->alias}");
+	} else {
+		elgg_push_breadcrumb($entity->getContainerEntity()->name, "project/{$entity->getContainerEntity()->alias}");
+	}
+	elgg_push_breadcrumb(elgg_echo('blog:blogs'), "blog/all");
 
 	$page_type = $page[0];
 	switch ($page_type) {
@@ -158,12 +167,8 @@ function blog_page_handler($page) {
 			return false;
 	}
 
-	if (isset($params['sidebar'])) {
-		$params['sidebar'] .= elgg_view('blog/sidebar', array('page' => $page_type));
-	} else {
-		$params['sidebar'] = elgg_view('blog/sidebar', array('page' => $page_type));
-	}
-
+	$params['sidebar'] = elgg_view('blog/sidebar', array('page' => $page_type));
+	
 	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($params['title'], $body);

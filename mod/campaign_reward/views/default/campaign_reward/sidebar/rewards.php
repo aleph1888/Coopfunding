@@ -19,7 +19,7 @@ if ($fundcampaign) {
 		$url = elgg_get_site_url() . "campaign_reward/books/{$fundcampaign->guid}";
 		$content .= "<a href=" .  $url . ">" . elgg_echo('campaign_reward:books:view all') . "</a>";
 	}
-	$content .= "<ul>";
+	$content .= "<ul><br>";
 		
 	if ($entities) {
 		foreach ($entities as $entity){

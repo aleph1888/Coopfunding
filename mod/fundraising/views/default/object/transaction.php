@@ -14,20 +14,16 @@ if (!$transaction) {
 $owner = get_entity($transaction->contributor);
 
 if ($transaction->method =="bankaccount") {
-    $metadata = elgg_view_menu('entity', array(
-    	'entity' => $transaction,
-    	'handler' => 'fundraising/bankaccount',
-    	'sort_by' => 'priority',
-    	'class' => 'elgg-menu-hz',
-    ));
+	$metadata = elgg_view_menu('entity', array(
+		'entity' => $transaction,
+		'handler' => 'fundraising/bankaccount',
+		'sort_by' => 'priority',
+		'class' => 'elgg-menu-hz',
+	));
 }
 
-if (elgg_is_active_plugin('fundraising')) {
-    elgg_load_library('coopfunding:fundraising');
-    
-    $container = $transaction->container_guid;
-  
-}
+elgg_load_library('coopfunding:fundraising');
+$container = $transaction->container_guid;
 
 $owner_icon = elgg_view_entity_icon($owner, 'tiny');
 $owner_link = elgg_view('output/url', array(
@@ -38,17 +34,16 @@ $owner_link = elgg_view('output/url', array(
 $author_text = elgg_echo('byline', array($owner_link));
 $date = elgg_view_friendly_time ($transaction->commit_date);
 
-if (elgg_is_active_plugin("campaign_reward")) {
-	
-    elgg_load_library('elgg:campaign_reward');	
-	$reward_guid = campaign_reward_get_reward_or_transaction($transaction->guid);	
+if (elgg_is_active_plugin("campaign_reward")) {	
+	elgg_load_library('elgg:campaign_reward');
+	$reward_guid = campaign_reward_get_reward_or_transaction($transaction->guid);
 
 	$reward = get_entity($reward_guid);
 
 	if ($reward) {
 		$reward_title = $reward->title;	
 	} else {
-		$reward_title = "campaign_reward:noreward";
+		$reward_title = elgg_echo("campaign_reward:noreward");
 	}
 }
 

@@ -23,8 +23,10 @@
 	'campaign_reward' => 'Rewards',
 	'campaign_reward:title' => "%s 's Rewards",
 	'campaign_reward:amount' => 'Amount',
+	'campaign_reward:amountEur' => 'Amount',
 	'campaign_reward:stock' => 'Stock',
-
+	'campaign_reward:left' => 'left', //remaining
+	'campaign_reward:noreward' => 'No reward',
 	'campaign_reward:body' => 'Body',
 
 	'campaign_reward:edit' => 'Edit reward',

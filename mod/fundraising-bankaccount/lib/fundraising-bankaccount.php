@@ -44,11 +44,10 @@ function fundraising_bankaccount_get_page_content_edit($page, $guid = NULL) {
 	$vars = array();
 	$vars['id'] = 'fundraising_bankaccount-post-edit';
 	$vars['class'] = 'elgg-form-alt';
-
-	$sidebar = '';
+	
 	if ($page == 'edit') {
 		$transaction = get_entity($guid);
-        	$container = get_entity($transaction->container_guid);
+		$container = get_entity($transaction->container_guid);
 
 		$title = elgg_echo('fundraising:bankaccount:editdeposit');
 
@@ -57,16 +56,11 @@ function fundraising_bankaccount_get_page_content_edit($page, $guid = NULL) {
 
 			$body_vars = fundraising_bankaccount_prepare_form_vars($transaction, $guid);
 
-			elgg_push_breadcrumb(elgg_echo("{$container->alias}"), $container->getURL());
-			elgg_push_breadcrumb(elgg_echo('fundraising:bankaccount:editdeposit'));
-
 			$content = elgg_view_form('transaction/save', $vars, $body_vars);
 		} else {
 			$content = elgg_echo('transaction:error:cannot_edit_item');
 		}
 	} else {
-		elgg_push_breadcrumb(elgg_echo('fundraising:bankaccount:newdeposit'));
-
 		$body_vars = fundraising_bankaccount_prepare_form_vars(null, $guid);
 
 		$title = elgg_echo('fundraising:bankaccount:newdeposit');

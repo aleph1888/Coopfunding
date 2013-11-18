@@ -219,7 +219,7 @@ function campaign_reward_get_selector ($params){
 	$options = array();
 	if ($rewards) {
 		//none option
-		$options[0] = elgg_echo('campaign_reward:select_none');
+		$options[0] = elgg_echo('campaign_reward:noreward');
 
 		//For each reward...
 		foreach ($rewards as $reward){
@@ -229,7 +229,7 @@ function campaign_reward_get_selector ($params){
 			//Display if stocked
 			if ($is_stocked)	{
 				$left_text = " / ". elgg_echo('campaign_reward:left') . " " . $left;
-				$amount_text = elgg_echo('campaign_reward:amount€') . " " . $reward->amount;
+				$amount_text = elgg_echo('fundraising:contributions:eur', array($reward->amount));
 				$options[$reward->guid] = $reward-> title . " " . $amount_text . $left_text;
 			}
 		}
@@ -239,7 +239,7 @@ function campaign_reward_get_selector ($params){
 	$select = elgg_view("input/dropdown", array("name" => "reward_guid", "options_values" => $options, "value" => $selected_reward_guid));
 
 	//Display selector
- 	$output = "<div><label>" . elgg_echo('campaign_reward:reward') . "</label><br>" . $select . "</div>";
+ 	$output = "<div><label>" . elgg_echo('campaign_reward:rewards') . "</label><br>" . $select . "</div>";
 
 	return  $output;
 

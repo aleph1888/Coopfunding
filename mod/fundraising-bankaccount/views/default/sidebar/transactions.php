@@ -22,7 +22,6 @@ if ($entity) {
 		$body = elgg_view('output/url', array(
 			'text' => elgg_echo('fundraising:bankaccount:manage'),
 			'href' => "fundraising/bankaccount/managedeposits/{$guid}",
-			'class' => "elgg-button elgg-button-action" 
 		));  
 
 		echo elgg_view_module('aside', elgg_echo('fundraising:bankaccount'), $body);	
