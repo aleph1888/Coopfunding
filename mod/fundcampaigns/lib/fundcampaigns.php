@@ -96,7 +96,7 @@ function fundcampaigns_is_active_campaign ($fundcampaign) {
 
 }
 
-function fundcampaigns_get_active_campaign ($guid = 0) {
+function fundcampaigns_get_active_campaign ($guid = 0, $checkdates = true) {
 	$fundcampaign =  current(elgg_get_entities_from_metadata(array(
 		'type' => 'group',
 		'subtype' => 'fundcampaign',
@@ -106,9 +106,12 @@ function fundcampaigns_get_active_campaign ($guid = 0) {
 		'limit' => 1,
 	)));
 
-	if (fundcampaigns_is_active_campaign ($fundcampaign)) {
-		return $fundcampaign;
-	}
-	return null;
+	if ($checkdates) {
+		if (!fundcampaigns_is_active_campaign ($fundcampaign)) {
+			return null;
+		}
+	} 
+
+	return $fundcampaign;
 
 }

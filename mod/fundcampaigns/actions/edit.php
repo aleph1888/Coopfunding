@@ -65,6 +65,15 @@ foreach (elgg_get_config("fundcampaign") as $shortname => $valuetype) {
 	}
 }
 
+//Control is_active
+if (!$is_new_fundcampaign && $input['is_active'] && !$fundcampaign->is_active) {
+	$fundcampaign_old = fundcampaigns_get_active_campaign($fundcampaign->container_guid, false);
+	if ($fundcampaign_old) {
+		$fundcampaign_old->is_active = false;
+		$fundcampaign_old->save();
+	}
+}
+
 // TODO CHANGE OWNER
 /*$old_owner_guid = $is_new_fundcampaign ? 0 : $fundcampaign->owner_guid;
 $new_owner_guid = (int) get_input('owner_guid');
