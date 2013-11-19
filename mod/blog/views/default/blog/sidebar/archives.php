@@ -6,19 +6,15 @@
 $loggedin_user = elgg_get_logged_in_user_entity();
 $page_owner = elgg_get_page_owner_entity();
 
-if (!$page_owner) {
-	var_dump($vars);exit();
-}
-
 if (elgg_instanceof($page_owner, 'user')) {
 	$url_segment = 'blog/archive/' . $page_owner->username;
 } else {
-	$url_segment = 'blog/object/' . $page_owner->getGUID() . '/archive';
+	$url_segment = 'blog/group/' . $page_owner->getGUID() . '/archive';
 }
 
 // This is a limitation of the URL schema.
 if ($page_owner && $vars['page'] != 'friends') {
-	$dates = array_reverse(get_entity_dates('object', 'blog', $page_owner->getGUID()));
+	$dates = get_entity_dates('object', 'blog', $page_owner->getGUID());
 	
 	if ($dates) {
 		$title = elgg_echo('blog:archives');
