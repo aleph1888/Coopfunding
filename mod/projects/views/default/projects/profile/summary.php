@@ -40,7 +40,7 @@ if (!$owner) {
 
 	<div class="projects-profile-description elgg-body">
 		<?php
-			echo elgg_view('output/longtext', array('value' => $project->description));
+			echo elgg_view('output/longtext', array('value' => $project->description));			
 		?>
 	</div>
 </div>

@@ -1,8 +1,13 @@
 <?php
 /**
- * Tag cloud widget
+ * categories + Tag cloud widget
  */
 
+
+elgg_push_context('categories');
+$categories = elgg_view('output/categories');
+elgg_pop_context();
+echo elgg_view_module('aside', elgg_echo('Categories'), $categories);
 
 elgg_push_context('tags');
 $options = array(

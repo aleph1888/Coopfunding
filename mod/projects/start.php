@@ -128,6 +128,7 @@ function projects_fields_setup() {
 	$profile_defaults = array(
 		'briefdescription' => 'text',
 		'description' => 'longtext',
+		'universal_categories' => 'categories', 
 		'interests' => 'tags',
 		'startdate' => 'date',
 		'mail' => 'text',

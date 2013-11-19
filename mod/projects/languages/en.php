@@ -25,6 +25,7 @@ $language = array(
 	'projects:name' => 'Project name',
 	'projects:alias' => 'Project short name (displayed in URLs, alphanumeric characters only)',
 	'projects:description' => 'Description',
+	'projects:universal_categories' => 'Categories',
 	'projects:briefdescription' => 'Brief description',
 	'projects:interests' => 'Tags',
 	'projects:website' => 'Website',

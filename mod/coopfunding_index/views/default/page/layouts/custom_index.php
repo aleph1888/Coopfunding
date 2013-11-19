@@ -16,6 +16,9 @@ $mod_params = array('class' => 'elgg-module-highlight');
 		<div class="elgg-inner pvm prl">
 <?php
 
+if ($vars['projects_categories']) {
+	echo elgg_view_module('info',  elgg_echo("custom:projects:categories"), $vars['projects_categories'], $mod_params);
+}
 if ($vars['projects_featured']) {
 	echo elgg_view_module('info',  elgg_echo("custom:projects:featured"), $vars['projects_featured'], $mod_params);
 }
