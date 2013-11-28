@@ -102,7 +102,7 @@ function fundcampaigns_page_handler($page, $handler) {
 			elgg_set_page_owner_guid($page[1]);
 			set_input('project', $page[1]);	
 			$project = get_entity($page[1]);
-			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
+			elgg_push_breadcrumb($project->name, "project/{$project->alias}");
 			fundcampaigns_register_toggle();
 			fundcampaigns_handle_owner_page($page[1]);
 			break;
@@ -110,7 +110,7 @@ function fundcampaigns_page_handler($page, $handler) {
 		case 'view':
 			if (!$fundcampaign) { $fundcampaign = get_entity($page[1]);}
 			$project = get_entity($fundcampaign->container_guid);
-			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
+			elgg_push_breadcrumb($project->name, "project/{$project->alias}");
 			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
 			fundcampaigns_handle_view_page($fundcampaign->guid);
 			break;
@@ -119,7 +119,7 @@ function fundcampaigns_page_handler($page, $handler) {
 			$fundcampaign = fundcampaigns_get_from_alias($page[1]);
 			$project = get_entity( $fundcampaign->container_guid);
 			elgg_set_page_owner_guid($project->guid);
-			elgg_push_breadcrumb($project->alias, "project/{$project->alias}");
+			elgg_push_breadcrumb($project->name, "project/{$project->alias}");
 			elgg_push_breadcrumb(elgg_echo("fundcampaigns"));
 			set_input('fundcampaign', $fundcampaign->guid);
 			set_input('project', $fundcampaign->container_guid);
@@ -150,12 +150,15 @@ function fundcampaigns_handle_owner_page($project_guid) {
 	$title = elgg_echo('fundcampaigns:campaigns');
 	elgg_push_breadcrumb($title);
 
-	elgg_register_menu_item('title', array(
-		'name' => 'fundcampaigns',
-		'href' => "fundcampaigns/add/{$project_guid}",
-		'text' => elgg_echo('fundcampaigns:add'),
-		'link_class' => 'elgg-button elgg-button-action',
-	));
+	$project = get_entity($project_guid);
+	if ($project->canEdit() || elgg_is_admin_logged_in()) {
+		elgg_register_menu_item('title', array(
+			'name' => 'fundcampaigns',
+			'href' => "fundcampaigns/add/{$project_guid}",
+			'text' => elgg_echo('fundcampaigns:add'),
+			'link_class' => 'elgg-button elgg-button-action',
+		));
+	}
 
 	$content = elgg_list_entities(array(
 		'type' => 'group',

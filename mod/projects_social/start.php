@@ -14,7 +14,8 @@ elgg_register_event_handler('init', 'system', 'projects_social_init');
 function projects_social_init() {
 
 	elgg_set_config('projects_social', array('facebook', 'twitter'));
-	elgg_extend_view('projects/sidebar/profile', 'projects/sidebar/projects_social');
+	elgg_set_config('projects_social_lorea_seeds', array('n-1', 'anillosur'));
+	elgg_extend_view('projects/sidebar/tagcloud', 'projects/sidebar/projects_social');
 
 }
 

@@ -67,6 +67,7 @@ foreach (elgg_get_config("fundcampaign") as $shortname => $valuetype) {
 
 //Control is_active
 if (!$is_new_fundcampaign && $input['is_active'] && !$fundcampaign->is_active) {
+	elgg_load_library("elgg:fundcampaigns");
 	$fundcampaign_old = fundcampaigns_get_active_campaign($fundcampaign->container_guid, false);
 	if ($fundcampaign_old) {
 		$fundcampaign_old->is_active = false;
